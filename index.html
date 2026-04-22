@@ -1159,7 +1159,7 @@ Thanks,
           <span id="globe-coords">— · —</span>
           <div class="right">
             <button class="globe-filter-toggle" id="filter-toggle">SHOW EXCLUDED</button>
-            <button class="globe-rotate-toggle" id="rotate-toggle">⏸ ROTATE</button>
+            <button class="globe-rotate-toggle" id="rotate-toggle">▶ ROTATE</button>
           </div>
         </div>
       </div>
@@ -2109,24 +2109,21 @@ const ASSETS = [
   }
 
   // ─── Versor-based drag (point under cursor stays under cursor) ────────────
+  // No momentum: globe stops exactly where the user releases. This is what makes
+  // precise navigation feel sane.
   let dragging = false;
   let v0, q0, r0;
-  let velocity = [0, 0];
-  let velocityHistory = [];
-  let momentumActive = false;
-  let resumeAutoRotateAfterMomentum = false;
+  let wasAutoRotatingBeforeDrag = false;
 
   svg.call(d3.drag()
     .on('start', (event) => {
-      momentumActive = false;
-      resumeAutoRotateAfterMomentum = autoRotating;
-      if (autoRotating) toggleRotate();
+      wasAutoRotatingBeforeDrag = autoRotating;
+      if (autoRotating) toggleRotate();  // pause spin while user is interacting
       const inv = projection.invert([event.x, event.y]);
       if (!inv || isNaN(inv[0]) || isNaN(inv[1])) { v0 = q0 = r0 = null; return; }
       v0 = vCart(inv);
       r0 = projection.rotate();
       q0 = vFromAngles(r0);
-      velocityHistory = [];
       dragging = true;
     })
     .on('drag', (event) => {
@@ -2135,39 +2132,14 @@ const ASSETS = [
       if (!inv || isNaN(inv[0]) || isNaN(inv[1])) return;
       const v1 = vCart(inv);
       const q1 = vMul(q0, vDelta(v0, v1));
-      const newRot = vToAngles(q1);
-      const prev = projection.rotate();
-      velocityHistory.push({
-        time: performance.now(),
-        dλ: newRot[0] - prev[0],
-        dφ: newRot[1] - prev[1]
-      });
-      // Trim to last 100ms of motion for clean release-velocity estimate
-      while (velocityHistory.length && performance.now() - velocityHistory[0].time > 100) {
-        velocityHistory.shift();
-      }
-      projection.rotate(newRot);
+      projection.rotate(vToAngles(q1));
       redrawAll();
     })
     .on('end', () => {
       dragging = false;
-      if (velocityHistory.length >= 2) {
-        const recent = velocityHistory.slice(-Math.min(5, velocityHistory.length));
-        const sumDλ = recent.reduce((s, v) => s + v.dλ, 0);
-        const sumDφ = recent.reduce((s, v) => s + v.dφ, 0);
-        const span = (recent[recent.length-1].time - recent[0].time) + 16;
-        const vx = sumDλ * 16 / span;
-        const vy = sumDφ * 16 / span;
-        if (Math.hypot(vx, vy) > 0.05) {
-          velocity = [vx, vy];
-          momentumActive = true;
-        } else if (resumeAutoRotateAfterMomentum && !autoRotating) {
-          toggleRotate();
-        }
-      } else if (resumeAutoRotateAfterMomentum && !autoRotating) {
-        toggleRotate();
-      }
       v0 = q0 = r0 = null;
+      // Note: auto-rotate does NOT auto-resume. If the user wants spin back on,
+      // they tap the ROTATE button. Keeps the globe predictable.
     })
   );
 
@@ -2228,23 +2200,10 @@ const ASSETS = [
   });
 
   // ─── Auto-rotate + momentum tick loop ─────────────────────────────────────
-  let autoRotating = true;
+  let autoRotating = false;  // off by default — opt in via the rotate button
   let lastT = Date.now();
   function tick() {
-    if (momentumActive && !dragging) {
-      // Exponential decay; resume auto-rotate when momentum dies if it was on
-      velocity[0] *= 0.95;
-      velocity[1] *= 0.95;
-      if (Math.hypot(velocity[0], velocity[1]) < 0.02) {
-        momentumActive = false;
-        if (resumeAutoRotateAfterMomentum && !autoRotating) toggleRotate();
-        lastT = Date.now();
-      } else {
-        const r = projection.rotate();
-        projection.rotate([r[0] + velocity[0], r[1] + velocity[1], r[2]]);
-        redrawAll();
-      }
-    } else if (autoRotating && !dragging) {
+    if (autoRotating && !dragging) {
       const now = Date.now();
       const dt = now - lastT;
       lastT = now;
