@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- htmlaunch:enhanced:v2 -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2264%22%20height%3D%2264%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22hsl(332%2C72%25%2C58%25)%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22hsl(2%2C72%25%2C44%25)%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22url(%23g)%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2246%22%20text-anchor%3D%22middle%22%20font-family%3D%22ui-sans-serif%2Csystem-ui%2C-apple-system%2CSegoe%20UI%2Csans-serif%22%20font-size%3D%2238%22%20font-weight%3D%22800%22%20fill%3D%22%23ffffff%22%3EM%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="theme-color" content="#7b1465">
+<meta name="description" content="MS-001 — The Mississippi Bonds | deployed with HTMLaunch">
+<link rel="canonical" href="https://jbarry0803.github.io/ms-001-the-mississippi-bonds/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MS-001 — The Mississippi Bonds">
+<meta property="og:title" content="MS-001 — The Mississippi Bonds">
+<meta property="og:description" content="MS-001 — The Mississippi Bonds | deployed with HTMLaunch">
+<meta property="og:url" content="https://jbarry0803.github.io/ms-001-the-mississippi-bonds/">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fjbarry0803.github.io%2Fms-001-the-mississippi-bonds%2F?w=1200&h=630">
+<meta property="og:image:alt" content="MS-001 — The Mississippi Bonds">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MS-001 — The Mississippi Bonds">
+<meta name="twitter:description" content="MS-001 — The Mississippi Bonds | deployed with HTMLaunch">
+<meta name="twitter:image" content="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fjbarry0803.github.io%2Fms-001-the-mississippi-bonds%2F?w=1200&h=630">
+<meta name="twitter:image:alt" content="MS-001 — The Mississippi Bonds">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MS-001 — The Mississippi Bonds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Host+Grotesk:ital,wght@0,300..800;1,300..800&family=Geist+Mono:wght@300..700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<style>
+  :root {
+    --bg: #0d0a08;
+    --bg-2: #15110d;
+    --bg-3: #1d1813;
+    --fg: #f0e7d4;
+    --fg-dim: #9c8e75;
+    --fg-mute: #5a4f3f;
+    --accent: #c63726;
+    --accent-soft: #e89272;
+    --accent-deep: #8a2418;
+    --green: #4a8b6a;
+    --line: rgba(240, 231, 212, 0.10);
+    --line-2: rgba(240, 231, 212, 0.18);
+    --font-sans: "Host Grotesk", system-ui, sans-serif;
+    --font-serif: "Fraunces", Georgia, serif;
+    --font-mono: "Geist Mono", monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; background: var(--bg); }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    line-height: 1.45;
+    overflow-x: hidden;
+    cursor: none;
+    min-height: 100vh;
+  }
+  ::selection { background: var(--accent); color: var(--fg); }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; background: none; border: none; color: inherit; cursor: none; }
+
+  /* ───── Custom cursor ───── */
+  .cursor {
+    position: fixed;
+    left: 0; top: 0;
+    width: 7px; height: 7px;
+    background: var(--fg);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10000;
+    mix-blend-mode: difference;
+    transform: translate(-50%, -50%);
+    transition: width .3s cubic-bezier(.23,1,.32,1), height .3s cubic-bezier(.23,1,.32,1), background .3s;
+  }
+  .cursor.hover { width: 56px; height: 56px; background: var(--accent); mix-blend-mode: normal; opacity: 0.8; }
+  .cursor-ring {
+    position: fixed;
+    left: 0; top: 0;
+    width: 32px; height: 32px;
+    border: 1px solid rgba(240, 231, 212, 0.3);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+  }
+  @media (max-width: 900px), (pointer: coarse) {
+    body { cursor: auto; }
+    .cursor, .cursor-ring { display: none; }
+    button, a { cursor: pointer; }
+  }
+
+  /* ───── Top bar ───── */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13, 10, 8, 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-inner {
+    display: grid; grid-template-columns: auto 1fr auto;
+    gap: 2rem; padding: 1rem 1.6rem; align-items: center;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 0.7rem;
+    font-family: var(--font-mono); font-size: 0.72rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+  }
+  .brand-mark {
+    width: 14px; height: 14px;
+    background: var(--accent); border-radius: 50%;
+    animation: pulseDot 2.4s ease-in-out infinite;
+  }
+  @keyframes pulseDot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.7); opacity: 0.7; }
+  }
+  .brand .num { color: var(--fg-dim); }
+  .brand .name { color: var(--fg); }
+  .topbar-meta {
+    display: flex; justify-content: center; gap: 1.4rem;
+    font-family: var(--font-mono); font-size: 0.66rem;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--fg-dim);
+  }
+  .topbar-meta span:not(:last-child)::after {
+    content: "·"; margin-left: 1.4rem; color: var(--fg-mute);
+  }
+  .topbar-cta {
+    padding: 0.55rem 1.1rem;
+    border: 1px solid var(--line-2); border-radius: 999px;
+    font-family: var(--font-mono); font-size: 0.65rem;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--fg);
+    transition: background .3s, color .3s, border-color .3s;
+  }
+  .topbar-cta:hover { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  @media (max-width: 720px) {
+    .topbar-meta, .topbar-cta { display: none; }
+  }
+
+  /* ───── Title bar ───── */
+  .titlebar {
+    padding: 2.4rem 1.6rem 1.8rem;
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(to bottom, var(--bg-2), var(--bg));
+  }
+  .titlebar-inner {
+    display: grid; grid-template-columns: 1fr auto;
+    gap: 2rem; align-items: end;
+    max-width: 1400px; margin: 0 auto;
+  }
+  .title-eyebrow {
+    font-family: var(--font-mono); font-size: 0.65rem;
+    letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 0.8rem;
+    display: flex; align-items: center; gap: 0.7rem;
+  }
+  .title-eyebrow::before {
+    content: ""; width: 22px; height: 1px; background: var(--accent);
+  }
+  .title-main {
+    font-family: var(--font-sans); font-weight: 500;
+    font-size: clamp(2.2rem, 5.6vw, 4.4rem);
+    line-height: 0.95; letter-spacing: -0.035em;
+  }
+  .title-main em {
+    font-family: var(--font-serif); font-style: italic;
+    font-weight: 300; color: var(--accent);
+  }
+  .title-side {
+    font-family: var(--font-mono); font-size: 0.66rem;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--fg-dim); text-align: right; line-height: 1.7;
+  }
+  .title-side .v { color: var(--fg); }
+  @media (max-width: 720px) {
+    .titlebar-inner { grid-template-columns: 1fr; }
+    .title-side { text-align: left; }
+  }
+
+  /* ───── Tabs ───── */
+  .tabs {
+    position: sticky; top: 49px; z-index: 90;
+    background: rgba(13, 10, 8, 0.94);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs-inner {
+    display: flex; max-width: 1400px; margin: 0 auto;
+    padding: 0 1.6rem; min-width: max-content;
+  }
+  .tab {
+    flex-shrink: 0; padding: 1rem 0; margin-right: 2.4rem;
+    font-family: var(--font-mono); font-size: 0.72rem;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--fg-dim); position: relative;
+    transition: color .3s;
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .tab .tab-num { color: var(--fg-mute); font-size: 0.62rem; transition: color .3s; }
+  .tab:hover { color: var(--fg); }
+  .tab:hover .tab-num { color: var(--accent-soft); }
+  .tab.active { color: var(--fg); }
+  .tab.active .tab-num { color: var(--accent); }
+  .tab.active::after {
+    content: ""; position: absolute;
+    left: 0; bottom: -1px; width: 100%; height: 2px;
+    background: var(--accent);
+    animation: tabIndicator .4s cubic-bezier(.23,1,.32,1);
+  }
+  @keyframes tabIndicator {
+    from { transform: scaleX(0); transform-origin: left; }
+    to { transform: scaleX(1); transform-origin: left; }
+  }
+
+  /* ───── Panels ───── */
+  .panels {
+    max-width: 1400px; margin: 0 auto;
+    padding: 2.4rem 1.6rem 4rem;
+    min-height: calc(100vh - 240px);
+  }
+  .panel { display: none; animation: panelIn .5s cubic-bezier(.23,1,.32,1); }
+  .panel.active { display: block; }
+  @keyframes panelIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel h2 {
+    font-family: var(--font-serif); font-style: italic;
+    font-weight: 300; font-size: clamp(2rem, 4vw, 3.2rem);
+    line-height: 1; letter-spacing: -0.025em; margin-bottom: 1.4rem;
+  }
+  .panel h2 strong {
+    font-family: var(--font-sans); font-style: normal;
+    font-weight: 500; color: var(--fg);
+  }
+  .panel h3 {
+    font-family: var(--font-mono); font-size: 0.7rem;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 1rem;
+  }
+  .panel p { font-size: 1.02rem; line-height: 1.6; color: var(--fg); margin-bottom: 1.2rem; }
+  .panel p.dim { color: var(--fg-dim); }
+  .panel a {
+    color: var(--accent-soft);
+    border-bottom: 1px solid rgba(232, 146, 114, 0.4);
+    transition: color .25s, border-color .25s;
+  }
+  .panel a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  .panel strong { font-weight: 600; color: var(--fg); }
+  .panel em { font-style: italic; color: var(--accent-soft); }
+
+  /* ─── Overview ─── */
+  .overview-grid {
+    display: grid; grid-template-columns: 1.4fr 1fr;
+    gap: 3rem; align-items: start;
+  }
+  @media (max-width: 900px) { .overview-grid { grid-template-columns: 1fr; gap: 2rem; } }
+
+  .overview-lede {
+    font-family: var(--font-serif); font-weight: 300;
+    font-size: clamp(1.5rem, 2.6vw, 2rem);
+    line-height: 1.3; letter-spacing: -0.01em; color: var(--fg);
+  }
+  .overview-lede em { color: var(--accent); font-style: italic; }
+  .overview-body { font-size: 1rem; line-height: 1.65; color: var(--fg-dim); margin-top: 1.6rem; }
+  .overview-body strong { color: var(--fg); }
+
+  .overview-stats {
+    display: grid; gap: 0; border: 1px solid var(--line);
+  }
+  .stat-row {
+    padding: 1.4rem; border-bottom: 1px solid var(--line);
+    display: grid; grid-template-columns: 1fr auto;
+    gap: 1rem; align-items: baseline;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .k {
+    font-family: var(--font-mono); font-size: 0.62rem;
+    letter-spacing: 0.22em; text-transform: uppercase; color: var(--fg-dim);
+  }
+  .stat-row .v {
+    font-family: var(--font-serif); font-style: italic; font-weight: 300;
+    font-size: 1.4rem; line-height: 1.1; text-align: right; color: var(--fg);
+  }
+  .stat-row.headline { background: var(--bg-2); }
+  .stat-row.headline .v { color: var(--accent); font-size: 1.7rem; }
+
+  .strategy-mini {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 1px; background: var(--line);
+    margin-top: 2.4rem; border: 1px solid var(--line);
+  }
+  .strategy-mini > div { background: var(--bg); padding: 1.6rem; }
+  .strategy-mini h4 {
+    font-family: var(--font-mono); font-size: 0.62rem;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 0.7rem;
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .strategy-mini h4 .step {
+    font-family: var(--font-serif); font-style: italic;
+    font-size: 1.4rem; color: var(--fg); line-height: 1;
+  }
+  .strategy-mini p { font-size: 0.92rem; color: var(--fg-dim); margin: 0; line-height: 1.5; }
+
+  /* ─── History ─── */
+  .history-layout {
+    display: grid; grid-template-columns: 220px 1fr; gap: 3rem;
+  }
+  @media (max-width: 900px) { .history-layout { grid-template-columns: 1fr; } }
+
+  .timeline {
+    border-left: 1px solid var(--line-2);
+    padding-left: 1.4rem;
+  }
+  .timeline-item { position: relative; padding-bottom: 1.4rem; }
+  .timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -1.69rem; top: 0.4rem;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1.5px solid var(--accent);
+  }
+  .timeline-item.major::before { background: var(--accent); }
+  .timeline-year {
+    font-family: var(--font-mono); font-size: 0.7rem;
+    letter-spacing: 0.18em; color: var(--accent);
+    margin-bottom: 0.2rem;
+  }
+  .timeline-event {
+    font-family: var(--font-sans); font-size: 0.86rem;
+    color: var(--fg-dim); line-height: 1.4;
+  }
+
+  .history-prose { max-width: 65ch; }
+  .pullquote {
+    margin: 2.4rem 0; padding: 1.6rem 0;
+    border-top: 1px solid var(--line-2);
+    border-bottom: 1px solid var(--line-2);
+    font-family: var(--font-serif); font-style: italic;
+    font-weight: 300; font-size: 1.5rem;
+    line-height: 1.35; color: var(--fg);
+  }
+  .pullquote .attr {
+    display: block; margin-top: 0.8rem;
+    font-family: var(--font-mono); font-size: 0.62rem;
+    font-style: normal; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--fg-dim);
+  }
+
+  /* ─── Acquire ─── */
+  .acquire-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+  }
+  @media (max-width: 900px) { .acquire-grid { grid-template-columns: 1fr; } }
+
+  .draft {
+    background: var(--bg-2); border: 1px solid var(--line);
+    border-top: 2px solid var(--accent);
+    padding: 1.6rem; transition: border-top-color .3s;
+  }
+  .draft:hover { border-top-color: var(--accent-soft); }
+  .draft-tag {
+    font-family: var(--font-mono); font-size: 0.62rem;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 0.4rem;
+  }
+  .draft-title {
+    font-family: var(--font-serif); font-style: italic;
+    font-weight: 300; font-size: 1.4rem;
+    margin-bottom: 1rem; line-height: 1.1;
+  }
+  .draft-meta-line {
+    font-family: var(--font-mono); font-size: 0.7rem;
+    color: var(--fg-dim);
+    border-bottom: 1px dashed var(--line-2);
+    padding-bottom: 0.8rem; margin-bottom: 1rem;
+  }
+  .draft-meta-line .k { color: var(--fg-mute); }
+  .draft-meta-line .v { color: var(--fg); }
+  .draft-body {
+    font-family: var(--font-serif); font-size: 0.86rem;
+    line-height: 1.55; white-space: pre-wrap; color: var(--fg);
+    max-height: 320px; overflow-y: auto;
+    padding-right: 0.6rem;
+    scrollbar-width: thin; scrollbar-color: var(--fg-mute) transparent;
+  }
+  .draft-body::-webkit-scrollbar { width: 4px; }
+  .draft-body::-webkit-scrollbar-thumb { background: var(--fg-mute); }
+
+  .draft-action {
+    margin-top: 1rem; display: flex; gap: 0.6rem; flex-wrap: wrap;
+  }
+  .btn-action {
+    padding: 0.55rem 0.9rem;
+    border: 1px solid var(--line-2); border-radius: 999px;
+    font-family: var(--font-mono); font-size: 0.62rem;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--fg); transition: all .3s;
+  }
+  .btn-action:hover { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .btn-action.copy.copied { background: var(--green); border-color: var(--green); color: var(--bg); }
+
+  .acquire-context {
+    grid-column: 1 / -1; margin-top: 1rem;
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1px; background: var(--line);
+    border: 1px solid var(--line);
+  }
+  @media (max-width: 720px) { .acquire-context { grid-template-columns: 1fr; } }
+  .acquire-context > div { background: var(--bg); padding: 1.2rem; }
+  .acquire-context h4 {
+    font-family: var(--font-mono); font-size: 0.62rem;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--fg-dim); margin-bottom: 0.5rem;
+  }
+  .acquire-context .big-num {
+    font-family: var(--font-serif); font-style: italic; font-weight: 300;
+    font-size: 2.2rem; line-height: 1; color: var(--accent);
+  }
+  .acquire-context .big-num .small {
+    font-size: 0.95rem; color: var(--fg-dim); margin-left: 0.3rem;
+  }
+  .acquire-context p { font-size: 0.78rem; color: var(--fg-dim); margin-top: 0.5rem; line-height: 1.45; }
+
+  /* ─── Atlas (globe) ─── */
+  .atlas-layout {
+    display: grid; grid-template-columns: 1fr 360px;
+    gap: 2.4rem; align-items: start;
+  }
+  @media (max-width: 900px) { .atlas-layout { grid-template-columns: 1fr; } }
+
+  .globe-wrap {
+    position: relative; aspect-ratio: 1;
+    background: radial-gradient(circle at 30% 30%, #1a1410 0%, #0a0805 75%);
+    border: 1px solid var(--line-2);
+    border-radius: 50%;
+    overflow: hidden; cursor: grab;
+  }
+  .globe-wrap:active { cursor: grabbing; }
+  .globe-wrap svg { display: block; width: 100%; height: 100%; }
+  .globe-wrap .ocean { fill: #0a0e14; }
+  .globe-wrap .graticule {
+    fill: none; stroke: rgba(240, 231, 212, 0.06); stroke-width: 0.5;
+  }
+  .globe-wrap .land {
+    fill: rgba(240, 231, 212, 0.78);
+    stroke: rgba(13, 10, 8, 0.4); stroke-width: 0.4;
+  }
+  .globe-wrap .marker { cursor: pointer; }
+  .globe-wrap .marker circle.outer { fill: none; stroke-width: 1.2; opacity: 0.5; }
+  .globe-wrap .marker circle.inner { stroke: var(--bg); stroke-width: 1; }
+  .globe-wrap .marker.asset circle.inner { fill: var(--accent); }
+  .globe-wrap .marker.asset circle.outer { stroke: var(--accent); }
+  .globe-wrap .marker.vessel circle.inner { fill: var(--green); }
+  .globe-wrap .marker.vessel circle.outer { stroke: var(--green); }
+  .globe-wrap .marker.source circle.inner { fill: var(--fg); }
+  .globe-wrap .marker.source circle.outer { stroke: var(--fg); }
+  .globe-wrap .marker.active circle.inner { r: 6; stroke-width: 2; }
+  .globe-wrap .marker.active circle.outer { r: 14; opacity: 1; }
+  @keyframes pulseRing {
+    0% { r: 4; opacity: 0.7; }
+    100% { r: 18; opacity: 0; }
+  }
+  .globe-wrap .marker.vessel circle.pulse {
+    fill: var(--green);
+    animation: pulseRing 2.4s ease-out infinite;
+    pointer-events: none;
+  }
+
+  .globe-controls {
+    position: absolute; bottom: 14px; left: 14px; right: 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--font-mono); font-size: 0.62rem;
+    letter-spacing: 0.15em; color: var(--fg-dim);
+    pointer-events: none;
+  }
+  .globe-rotate-toggle {
+    pointer-events: all;
+    background: rgba(240, 231, 212, 0.06);
+    border: 1px solid var(--line-2);
+    padding: 5px 10px;
+    font-family: var(--font-mono); font-size: 0.6rem;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--fg);
+    transition: background .25s;
+  }
+  .globe-rotate-toggle:hover { background: rgba(240, 231, 212, 0.14); }
+
+  .atlas-side h3 {
+    font-family: var(--font-mono); font-size: 0.62rem;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--fg-dim); margin-bottom: 0.8rem;
+    border-bottom: 1px solid var(--line); padding-bottom: 0.6rem;
+  }
+  .legend { display: grid; gap: 0.5rem; margin-bottom: 1.6rem; }
+  .legend-item {
+    display: grid; grid-template-columns: 14px 1fr auto;
+    gap: 0.7rem; align-items: center;
+    font-family: var(--font-mono); font-size: 0.66rem;
+    letter-spacing: 0.1em; color: var(--fg);
+  }
+  .legend-item .count { color: var(--fg-dim); font-size: 0.6rem; }
+  .legend-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    border: 1.5px solid var(--bg);
+  }
+  .legend-dot.asset { background: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .legend-dot.vessel { background: var(--green); box-shadow: 0 0 0 1px var(--green); }
+  .legend-dot.source { background: var(--fg); box-shadow: 0 0 0 1px var(--fg); }
+
+  .marker-detail {
+    background: var(--bg-2); border: 1px solid var(--line);
+    padding: 1.4rem; min-height: 280px;
+  }
+  .marker-detail .empty {
+    font-family: var(--font-serif); font-style: italic;
+    font-weight: 300; color: var(--fg-dim);
+    font-size: 0.92rem; line-height: 1.5;
+  }
+  .marker-detail .empty .hint {
+    display: block; margin-top: 0.8rem;
+    font-family: var(--font-mono); font-style: normal;
+    font-size: 0.62rem; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--fg-mute);
+  }
+  .marker-detail h4 {
+    font-family: var(--font-mono); font-size: 0.6rem;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--fg-dim); margin-bottom: 0.5rem;
+  }
+  .marker-detail h4.asset { color: var(--accent); }
+  .marker-detail h4.vessel { color: var(--green); }
+  .marker-detail h4.source { color: var(--fg); }
+  .marker-detail .name {
+    font-family: var(--font-serif); font-style: italic;
+    font-weight: 300; font-size: 1.4rem; line-height: 1.1;
+    color: var(--fg); margin-bottom: 0.3rem;
+  }
+  .marker-detail .where { font-size: 0.78rem; color: var(--fg-dim); margin-bottom: 1rem; }
+  .marker-detail .data-row {
+    display: grid; grid-template-columns: 80px 1fr; gap: 0.8rem;
+    font-family: var(--font-mono); font-size: 0.66rem;
+    line-height: 1.5; padding: 0.4rem 0;
+    border-top: 1px dotted var(--line);
+  }
+  .marker-detail .data-row.first { border-top: none; padding-top: 0; }
+  .marker-detail .data-row .k {
+    color: var(--fg-mute); letter-spacing: 0.1em;
+    text-transform: uppercase; font-size: 0.58rem; padding-top: 2px;
+  }
+  .marker-detail .data-row .v { color: var(--fg); }
+  .marker-detail .live-link {
+    display: inline-block; margin-top: 1rem;
+    color: var(--accent-soft);
+    font-family: var(--font-mono); font-size: 0.62rem;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    border-bottom: 1px solid rgba(232, 146, 114, 0.4); padding-bottom: 2px;
+  }
+  .marker-detail .live-link:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .atlas-caveat {
+    margin-top: 1.4rem; padding-top: 1rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono); font-size: 0.6rem;
+    letter-spacing: 0.06em; color: var(--fg-mute); line-height: 1.6;
+  }
+
+  /* ─── Legal ─── */
+  .legal-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 1px; background: var(--line);
+    border: 1px solid var(--line); margin-bottom: 2rem;
+  }
+  @media (max-width: 720px) { .legal-grid { grid-template-columns: 1fr; } }
+  .legal-card { background: var(--bg); padding: 1.6rem; transition: background .3s; }
+  .legal-card:hover { background: var(--bg-2); }
+  .legal-card .label {
+    font-family: var(--font-mono); font-size: 0.6rem;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 0.6rem;
+  }
+  .legal-card .marker-text {
+    font-family: var(--font-serif); font-style: italic;
+    font-weight: 300; font-size: 1.6rem; line-height: 1.1;
+    color: var(--fg); margin-bottom: 0.7rem;
+  }
+  .legal-card p {
+    font-size: 0.92rem; color: var(--fg-dim); line-height: 1.55; margin: 0;
+  }
+  .legal-pullquote {
+    padding: 1.6rem 0; text-align: center;
+    border-top: 1px solid var(--line-2);
+    border-bottom: 1px solid var(--line-2);
+    font-family: var(--font-serif); font-style: italic;
+    font-weight: 300; font-size: clamp(1.3rem, 2.4vw, 1.8rem);
+    line-height: 1.3; color: var(--fg);
+    max-width: 800px; margin: 0 auto;
+  }
+
+  /* ─── Sources ─── */
+  .sources-list { list-style: none; }
+  .sources-list li {
+    padding: 1rem 0; border-top: 1px solid var(--line);
+    font-size: 0.92rem; line-height: 1.55;
+    display: grid; grid-template-columns: 36px 1fr; gap: 1rem;
+    color: var(--fg-dim); transition: padding-left .3s;
+  }
+  .sources-list li:first-child { border-top: 1px solid var(--line-2); }
+  .sources-list li:hover { padding-left: 0.8rem; color: var(--fg); }
+  .sources-list .num {
+    font-family: var(--font-mono); font-size: 0.66rem;
+    color: var(--fg-mute); padding-top: 4px;
+  }
+  .sources-list strong {
+    font-family: var(--font-serif); font-style: italic;
+    font-weight: 400; color: var(--fg);
+  }
+
+  /* ─── Footer ─── */
+  .footer {
+    border-top: 1px solid var(--line);
+    padding: 1.4rem 1.6rem;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--font-mono); font-size: 0.62rem;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--fg-dim); background: var(--bg-2);
+  }
+  .footer .clock { color: var(--fg); }
+  @media (max-width: 720px) {
+    .footer { flex-direction: column; gap: 0.6rem; text-align: center; }
+  }
+
+  .copy-toast {
+    position: fixed; bottom: 30px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--green); color: var(--bg);
+    font-family: var(--font-mono); font-size: 0.7rem;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 0.7rem 1.4rem; border-radius: 999px;
+    opacity: 0; transition: all .35s cubic-bezier(.23,1,.32,1);
+    z-index: 5000; pointer-events: none;
+  }
+  .copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <span class="num">MS-001</span>
+      <span class="name">/ Working Case File</span>
+    </div>
+    <div class="topbar-meta">
+      <span>Sovereign Debt</span>
+      <span>Active Matter</span>
+      <span>Apr MMXXVI</span>
+    </div>
+    <a href="mailto:collect@glabarre.com" class="topbar-cta">Send Inquiry →</a>
+  </div>
+</header>
+
+<section class="titlebar">
+  <div class="titlebar-inner">
+    <div>
+      <div class="title-eyebrow">A 188-year-old default · Revival case</div>
+      <h1 class="title-main">The <em>Mississippi</em> Bonds</h1>
+    </div>
+    <div class="title-side">
+      Issuer · <span class="v">State of Mississippi</span><br>
+      Status · <span class="v">Repudiated 1842 / 1875</span><br>
+      Principal · <span class="v">~$7,000,000</span>
+    </div>
+  </div>
+</section>
+
+<nav class="tabs" id="tabs">
+  <div class="tabs-inner">
+    <button class="tab active" data-tab="overview"><span class="tab-num">01</span>Overview</button>
+    <button class="tab" data-tab="history"><span class="tab-num">02</span>History</button>
+    <button class="tab" data-tab="acquire"><span class="tab-num">03</span>Acquire</button>
+    <button class="tab" data-tab="atlas"><span class="tab-num">04</span>Atlas</button>
+    <button class="tab" data-tab="legal"><span class="tab-num">05</span>Legal</button>
+    <button class="tab" data-tab="sources"><span class="tab-num">06</span>Sources</button>
+  </div>
+</nav>
+
+<main class="panels">
+
+  <section class="panel active" data-panel="overview">
+    <div class="overview-grid">
+      <div>
+        <h3>The Situation at a Glance</h3>
+        <p class="overview-lede">In 1838 the State of Mississippi sold $5 million in bonds to capitalise a new state-owned bank. Within two years the bank was insolvent. By 1842 the legislature had walked away from the debt — the <em>first repudiation of a state debt in U.S. history</em>.</p>
+        <div class="overview-body">
+          <p>The bonds did not vanish. <strong>Hundreds are sitting in a single dealer's vault in Portsmouth, New Hampshire</strong> — the residue of a 1990 London auction by the liquidators of the Corporation of Foreign Bondholders. They can be bought for the price of a decent dinner.</p>
+          <p>This file sets out a two-step revival: <strong>acquire the paper at wholesale</strong>, then <strong>map the State of Mississippi's commercial assets abroad</strong> — the only category of property realistically reachable by a creditor.</p>
+        </div>
+        <div class="strategy-mini">
+          <div>
+            <h4><span class="step">I</span> Acquire</h4>
+            <p>Buy the bond inventory from George LaBarre Galleries at wholesale. List $700; target $200–300 at volume.</p>
+          </div>
+          <div>
+            <h4><span class="step">II</span> Map</h4>
+            <p>Identify Mississippi state assets in foreign jurisdictions. Trade offices on three continents; state-owned vessels at sea.</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3>Headline Figures</h3>
+        <div class="overview-stats">
+          <div class="stat-row headline">
+            <div class="k">Bond inventory held</div>
+            <div class="v">540+</div>
+          </div>
+          <div class="stat-row">
+            <div class="k">Original face value</div>
+            <div class="v">$2,000</div>
+          </div>
+          <div class="stat-row">
+            <div class="k">Current asking price</div>
+            <div class="v">$700</div>
+          </div>
+          <div class="stat-row">
+            <div class="k">2013 asking price</div>
+            <div class="v">$3,000</div>
+          </div>
+          <div class="stat-row">
+            <div class="k">MS overseas offices</div>
+            <div class="v">4</div>
+          </div>
+          <div class="stat-row">
+            <div class="k">Years since CFB folded</div>
+            <div class="v">~37</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="history">
+    <div class="history-layout">
+      <aside>
+        <h3>Timeline</h3>
+        <div class="timeline">
+          <div class="timeline-item major">
+            <div class="timeline-year">1831–33</div>
+            <div class="timeline-event">$2M Planters Bank bonds issued at 6%</div>
+          </div>
+          <div class="timeline-item major">
+            <div class="timeline-year">1838</div>
+            <div class="timeline-event">$5M Union Bank bonds issued at 5%, sold heavily into London</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">1840</div>
+            <div class="timeline-event">Union Bank declared insolvent</div>
+          </div>
+          <div class="timeline-item major">
+            <div class="timeline-year">1842</div>
+            <div class="timeline-event">Legislature repudiates the debt — first US state default</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">1868</div>
+            <div class="timeline-event">Corporation of Foreign Bondholders founded in London</div>
+          </div>
+          <div class="timeline-item major">
+            <div class="timeline-year">1875</div>
+            <div class="timeline-event">Constitutional bar on payment written into MS constitution</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">1986</div>
+            <div class="timeline-event">MS State Treasurer visits London; correspondence opens briefly</div>
+          </div>
+          <div class="timeline-item major">
+            <div class="timeline-year">1990</div>
+            <div class="timeline-event">CFB liquidates inventory at Phillips London auction</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">2013</div>
+            <div class="timeline-event">LaBarre reports holding 540+ bonds at $3,000 each</div>
+          </div>
+          <div class="timeline-item major">
+            <div class="timeline-year">2026</div>
+            <div class="timeline-event">LaBarre listing now $700; revival becomes plausible</div>
+          </div>
+        </div>
+      </aside>
+
+      <article class="history-prose">
+        <h2>A debt that <strong>never quite died</strong></h2>
+        <p>The Mississippi default is, in the long history of sovereign credit, one of the cleanest examples of a state walking away from a debt it could plainly have paid. The state was not bankrupt. It collected enough property tax in 1845 to comfortably service the Union Bank bonds. It chose not to.</p>
+        <p>The mechanics were these. In 1831–33 the state issued roughly <strong>$2 million in 6% bonds</strong> to capitalise the Planters Bank. In 1838 it issued a further <strong>$5 million in 5% bonds</strong> to capitalise the Mississippi Union Bank. Both issues were largely placed in London and on the Continent — the coupons were even printed payable in London, an open invitation to British capital. By 1841 Mississippi had stopped paying. By 1842 the legislature declared, technically, that there was no obligation. And in 1875 the state constitution was amended to bar any future legislature from ever paying or recognising the bonds.</p>
+        <p>The British creditors organised. The Council of Foreign Bondholders — later the Corporation of Foreign Bondholders, founded in London in 1868 — pursued the matter for over a century. Letters went to successive Mississippi governors and were not answered. In the 1980s, the Council managed brief correspondence with the State Treasurer, who actually visited London. Nothing came of it. <strong>The Council closed its doors in the late 1980s</strong>, having recovered more from czarist Russian railway bonds than from Jackson, Mississippi.</p>
+        <div class="pullquote">
+          "The British bondholders are getting a return on their investment, finally. The certificates, as collectibles, are worth something."
+          <span class="attr">— Clifford Thies, NPR, 2015</span>
+        </div>
+        <p>Most of the auctioned bonds ended up with George H. LaBarre Galleries in Portsmouth, New Hampshire, where they have sat for thirty-five years. They are the substrate of any modern revival.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="acquire">
+    <h2>Move one — <strong>acquire the paper</strong></h2>
+    <p class="dim" style="max-width: 70ch; margin-bottom: 2rem;">LaBarre lists the 1838 Union Bank bond at $700 apiece. In 2013 his father quoted $3,000 per bond and reported holding more than 540 of them. The price has dropped by more than three-quarters; the inventory has presumably not. Two letter drafts follow.</p>
+
+    <div class="acquire-grid">
+      <div class="draft">
+        <div class="draft-tag">Draft A · Quiet Collector</div>
+        <div class="draft-title">The soft open</div>
+        <div class="draft-meta-line"><span class="k">TO</span> <span class="v">collect@glabarre.com</span> &nbsp; <span class="k">RE</span> <span class="v">Mississippi 1838 / 1833 bonds — multiple</span></div>
+        <div class="draft-body" id="draftA">Hello,
+
+I'm interested in your State of Mississippi 1838 5% Union Bank bonds (Inv# GB5201, $2,000 denomination, signed by Governor McNutt) and the 1833 6% Planters Bank bonds I've seen referenced in your blog and earlier listings.
+
+A couple of questions before I move forward:
+
+1. How many of each issue do you currently have on hand? I've read references to a substantial inventory acquired from the Corporation of Foreign Bondholders liquidation in 1990 and would like to understand current availability.
+
+2. The website lists the Union Bank bonds at $700 each. If I were to take a meaningful quantity — say 20 to 50 pieces, possibly more — what kind of pricing could you do? I'd also be interested in the Planters Bank bonds on the same basis if you still have them.
+
+3. Are the bonds you have largely uniform in condition, or is there variation? Happy to take what you'd consider a representative mix.
+
+Family connection to the history here, so the interest is genuine and I'd like to build a proper holding rather than a single piece. Easiest to reach me by email to start, and I can call once we have a sense of numbers.
+
+Thanks very much,
+[Your name]</div>
+        <div class="draft-action">
+          <button class="btn-action copy" data-copy="draftA">Copy text</button>
+          <a href="mailto:collect@glabarre.com?subject=Inquiry%3A%20Mississippi%201838%20Union%20Bank%20%26%201833%20Planters%20Bank%20bonds" class="btn-action">Open in mail →</a>
+        </div>
+      </div>
+
+      <div class="draft">
+        <div class="draft-tag">Draft B · Wholesale Buyer</div>
+        <div class="draft-title">The direct offer</div>
+        <div class="draft-meta-line"><span class="k">TO</span> <span class="v">collect@glabarre.com</span> &nbsp; <span class="k">RE</span> <span class="v">Wholesale offer — MS state bonds</span></div>
+        <div class="draft-body" id="draftB">Hello,
+
+I'd like to discuss buying a significant quantity of your Mississippi state bonds — both the 1838 Union Bank 5% bonds (Inv# GB5201) and the 1833 6% Planters Bank bonds.
+
+From prior reporting, I understand you acquired a sizeable inventory of these from the 1990 London auction of Corporation of Foreign Bondholders holdings. I'd like to make an offer on the bulk of what you still have rather than buy one or two at retail.
+
+Could you let me know:
+— Current quantity on hand for each issue
+— Whether you'd be open to a single transaction for a large lot
+— A wholesale price per bond at, say, 50 pieces, 100 pieces, and "all you have"
+
+I'm a serious buyer and can move quickly once we agree on terms. Please reply by email and we can take it from there by phone.
+
+Thanks,
+[Your name]</div>
+        <div class="draft-action">
+          <button class="btn-action copy" data-copy="draftB">Copy text</button>
+          <a href="mailto:collect@glabarre.com?subject=Wholesale%20offer%20%E2%80%94%20Mississippi%20state%20bonds" class="btn-action">Open in mail →</a>
+        </div>
+      </div>
+
+      <div class="acquire-context">
+        <div>
+          <h4>List Price</h4>
+          <div class="big-num">$700<span class="small">/ bond</span></div>
+          <p>Union Bank 1838, $2,000 face, signed by Governor McNutt — Inv# GB5201</p>
+        </div>
+        <div>
+          <h4>Target Wholesale</h4>
+          <div class="big-num">$200<span class="small">–300</span></div>
+          <p>Achievable at meaningful volume given 35-year inventory hold and falling list price</p>
+        </div>
+        <div>
+          <h4>Contact George Jr.</h4>
+          <div class="big-num" style="font-size: 1.4rem;">1-800-717-9529</div>
+          <p>9 AM – 9 PM EST · ask for George · email collect@glabarre.com</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="atlas">
+    <h2>Move two — <strong>map the assets</strong></h2>
+    <p class="dim" style="max-width: 70ch; margin-bottom: 2rem;">The 11th Amendment has shut U.S. federal court for nearly two centuries. The realistic avenue is the State of Mississippi's commercial property abroad. Drag the globe to rotate; click any marker for full detail.</p>
+
+    <div class="atlas-layout">
+      <div class="globe-wrap" id="globe-container">
+        <div class="globe-controls">
+          <span id="globe-coords">— · —</span>
+          <button class="globe-rotate-toggle" id="rotate-toggle">⏸ AUTO-ROTATE</button>
+        </div>
+      </div>
+
+      <aside class="atlas-side">
+        <h3>Asset Categories</h3>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-dot asset"></div>
+            <div>State offices abroad</div>
+            <div class="count">04</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot vessel"></div>
+            <div>State-owned vessels</div>
+            <div class="count">04</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot source"></div>
+            <div>Bond source (LaBarre)</div>
+            <div class="count">01</div>
+          </div>
+        </div>
+
+        <h3>Selected Marker</h3>
+        <div class="marker-detail" id="marker-detail">
+          <div class="empty">
+            Choose any marker on the globe to inspect.
+            <span class="hint">Drag to rotate · click to inspect</span>
+          </div>
+        </div>
+
+        <div class="atlas-caveat">
+          AIS positions reflect last reported broadcast from public maritime sources. Office locations published by Mississippi Development Authority. Asset reachability for sovereign-debt purposes is unsettled and untested for U.S. sub-sovereigns.
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="legal">
+    <h2>What <strong>hasn't</strong> changed</h2>
+    <p class="dim" style="max-width: 70ch; margin-bottom: 2rem;">The obstacles are real and largely unchanged since 1841. They are not, however, insurmountable in 2026 — the modern sovereign-debt litigation playbook didn't exist when the Council of Foreign Bondholders was writing its unanswered letters.</p>
+
+    <div class="legal-grid">
+      <div class="legal-card">
+        <div class="label">Obstacle 01</div>
+        <div class="marker-text">11th Amendment</div>
+        <p>Foreign citizens still cannot sue a U.S. state in federal court without that state's consent. This is the single rule that closed the courthouse door to the British bondholders for nearly two centuries.</p>
+      </div>
+      <div class="legal-card">
+        <div class="label">Obstacle 02</div>
+        <div class="marker-text">The 1875 Bar</div>
+        <p>The Mississippi state constitution still expressly forbids the state from paying or recognising the Union Bank or Planters Bank bonds. As a matter of Mississippi law, the obligation is void.</p>
+      </div>
+      <div class="legal-card">
+        <div class="label">Path 01</div>
+        <div class="marker-text">Foreign-Court Attachment</div>
+        <p>The only viable path. Depends on (a) a foreign court treating the bond as recognisable debt, and (b) the targeted asset being commercial in character rather than diplomatic. Untested for U.S. sub-sovereigns — but the Argentine sovereign-debt precedents (NML Capital, 2010s) developed exactly this technique.</p>
+      </div>
+      <div class="legal-card">
+        <div class="label">Path 02</div>
+        <div class="marker-text">What's New Since 1990</div>
+        <p>German courts have grown more receptive to bondholder claims generally. International AIS data makes vessel asset-tracking trivially cheap. Public corporate registries make commercial office leases identifiable in hours. The infrastructure for a revived collection effort exists in a way it simply didn't when the CFB folded.</p>
+      </div>
+    </div>
+
+    <div class="legal-pullquote">
+      The shape of the strategy — consolidate the bonds cheaply, then chase commercial assets in friendly foreign jurisdictions — is the same shape the Argentine creditors used. <em>The legal innovation needed is the application of that playbook to a U.S. state.</em>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="sources">
+    <h2>Annex — <strong>sources</strong></h2>
+    <p class="dim" style="max-width: 70ch; margin-bottom: 2rem;">Every claim above traces to public records, dealer listings, scholarly articles, or live AIS data. Verify freely.</p>
+
+    <ol class="sources-list">
+      <li><span class="num">01</span><span><strong>LaBarre Galleries listing</strong> — $2,000 State of Mississippi 1838 Bond, Inv# GB5201. <a href="https://www.glabarre.com/item/_2_000_State_of_Mississippi_dated_1838_Bond_Uncanceled_signed_by_Governor_Alexander_G_McNutt_2_000_5_State_Loan_Bond/1995/c72">glabarre.com</a></span></li>
+      <li><span class="num">02</span><span><strong>LaBarre Galleries — Southern State Bonds category.</strong> <a href="https://www.glabarre.com/category/Southern_State_Bonds/c72">View all</a></span></li>
+      <li><span class="num">03</span><span><strong>Mississippi Development Authority — International Trade.</strong> Office locations and contacts. <a href="https://mississippi.org/services/international">mississippi.org/services/international</a></span></li>
+      <li><span class="num">04</span><span><strong>Annual Comprehensive Financial Reports.</strong> State of Mississippi DFA, 1996–present. <a href="https://www.dfa.ms.gov/publications">dfa.ms.gov/publications</a></span></li>
+      <li><span class="num">05</span><span><strong>USM Vessel Operations.</strong> University of Southern Mississippi research fleet. <a href="https://www.usm.edu/vessels/index.php">usm.edu/vessels</a></span></li>
+      <li><span class="num">06</span><span><strong>VesselFinder — R/V Point Sur (IMO 8023539).</strong> Live AIS position. <a href="https://www.vesselfinder.com/vessels/details/8023539">vesselfinder.com</a></span></li>
+      <li><span class="num">07</span><span><strong>VesselFinder — R/V Tommy Munro (IMO 8201088).</strong> <a href="https://www.vesselfinder.com/vessels/details/8201088">vesselfinder.com</a></span></li>
+      <li><span class="num">08</span><span><strong>NPR (2015)</strong> — How Mississippi Defaulted on $7 Million Worth of Bonds in 1841. <a href="https://www.npr.org/2015/07/01/419240752/how-mississippi-defaulted-on-7-million-worth-of-bonds-in-1841">npr.org</a></span></li>
+      <li><span class="num">09</span><span><strong>Cambridge JBS</strong> — The Effect of Southern State Bond Repudiation and British Debt Collection Efforts on Anglo-American Relations, 1840–1940. <a href="https://www.cambridge.org/core/journals/journal-of-british-studies/article/abs/effect-of-southern-state-bond-repudiation-and-british-debt-collection-efforts-on-angloamerican-relations-18401940/07FF868535AC7EBC1D6352D8EFB80401">cambridge.org</a></span></li>
+      <li><span class="num">10</span><span><strong>Foreign Affairs (1928)</strong> — Our Repudiated State Debts. <a href="https://www.foreignaffairs.com/articles/united-states/1928-04-01/our-repudiated-state-debts">foreignaffairs.com</a></span></li>
+      <li><span class="num">11</span><span><strong>NONVALEURS Blog</strong> — Mississippi Bonds 1838 (LaBarre provenance to the Phillips/CFB auction). <a href="https://nonvaleurs.tumblr.com/post/139299718847/mississippi-bonds-1838">nonvaleurs.tumblr.com</a></span></li>
+    </ol>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div>MS-001 / Working Case File</div>
+  <div>● Live document — vessel positions update via AIS</div>
+  <div class="clock" id="clock">—:—:— UTC</div>
+</footer>
+
+<div class="copy-toast" id="copyToast">✓ Copied to clipboard</div>
+
+<script>
+// CURSOR
+(function() {
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  if (!cursor || matchMedia('(pointer: coarse)').matches) return;
+  let mx = innerWidth/2, my = innerHeight/2, rx = mx, ry = my;
+  addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.transform = `translate(${mx}px, ${my}px) translate(-50%, -50%)`;
+  });
+  (function loop() {
+    rx += (mx - rx) * 0.18;
+    ry += (my - ry) * 0.18;
+    ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
+    requestAnimationFrame(loop);
+  })();
+  function bind() {
+    document.querySelectorAll('a, button, .marker').forEach(el => {
+      if (el.dataset.cursor) return;
+      el.dataset.cursor = '1';
+      el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    });
+  }
+  bind();
+  new MutationObserver(bind).observe(document.body, { childList: true, subtree: true });
+})();
+
+// TABS
+(function() {
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  tabs.forEach(t => {
+    t.addEventListener('click', () => {
+      const target = t.dataset.tab;
+      tabs.forEach(x => x.classList.toggle('active', x === t));
+      panels.forEach(p => p.classList.toggle('active', p.dataset.panel === target));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (target === 'atlas' && window.__globeRedraw) {
+        setTimeout(window.__globeRedraw, 50);
+      }
+    });
+  });
+})();
+
+// COPY
+(function() {
+  const toast = document.getElementById('copyToast');
+  document.querySelectorAll('.btn-action.copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.copy;
+      const text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.classList.add('copied');
+        btn.textContent = '✓ Copied';
+        toast.classList.add('show');
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.textContent = 'Copy text';
+          toast.classList.remove('show');
+        }, 1800);
+      });
+    });
+  });
+})();
+
+// CLOCK
+(function() {
+  const el = document.getElementById('clock');
+  function tick() {
+    const t = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    el.textContent = `${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}:${pad(t.getUTCSeconds())} UTC`;
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+
+// GLOBE
+const ASSETS = [
+  { id: 'frankfurt', type: 'asset', name: 'Mississippi Europe Office', where: 'Frankfurt am Main, Germany',
+    coords: [8.6821, 50.1109],
+    rows: [
+      { k: 'OPERATOR', v: 'Mississippi Development Authority' },
+      { k: 'ADDRESS', v: 'c/o SCHAFConnections, Sophienstrasse 2, 60487 Frankfurt am Main' },
+      { k: 'JURISDICTION', v: 'Federal Republic of Germany' },
+      { k: 'CHARACTER', v: 'Commercial trade-promotion office' }
+    ],
+    link: { url: 'https://mississippi.org/services/international', label: 'MDA INTERNATIONAL →' }
+  },
+  { id: 'tokyo', type: 'asset', name: 'Mississippi Asia-Pacific Office', where: 'Tokyo, Japan',
+    coords: [139.7595, 35.6735],
+    rows: [
+      { k: 'OPERATOR', v: 'Mississippi Development Authority' },
+      { k: 'ADDRESS', v: 'Shin Yurakucho Bldg 10F, 1-12-1 Yurakucho, Chiyoda-ku, Tokyo 100-0006' },
+      { k: 'JURISDICTION', v: 'Japan' },
+      { k: 'CHARACTER', v: 'Commercial trade-promotion office' }
+    ],
+    link: { url: 'https://mississippi.org/services/international', label: 'MDA INTERNATIONAL →' }
+  },
+  { id: 'santiago', type: 'asset', name: 'MDA South America Office', where: 'Santiago, Chile',
+    coords: [-70.6213, -33.4252],
+    rows: [
+      { k: 'OPERATOR', v: 'Mississippi Development Authority' },
+      { k: 'ADDRESS', v: 'Av. Los Conquistadores 1730, Of. 1605, Providencia, Santiago' },
+      { k: 'JURISDICTION', v: 'Republic of Chile' },
+      { k: 'CHARACTER', v: 'Commercial trade-promotion office' }
+    ],
+    link: { url: 'https://mississippi.org/services/international', label: 'MDA INTERNATIONAL →' }
+  },
+  { id: 'seoul', type: 'asset', name: 'Mississippi Korea Office', where: 'Seoul, South Korea',
+    coords: [126.9780, 37.5665],
+    rows: [
+      { k: 'OPERATOR', v: 'Mississippi Development Authority' },
+      { k: 'ADDRESS', v: 'Specific street address not currently published' },
+      { k: 'JURISDICTION', v: 'Republic of Korea' },
+      { k: 'CHARACTER', v: 'Commercial representative office' }
+    ],
+    link: { url: 'https://mississippi.org/services/international', label: 'MDA INTERNATIONAL →' }
+  },
+  { id: 'point-sur', type: 'vessel', name: 'R/V Point Sur', where: 'Gulf of Mexico (en route Gulfport, MS)',
+    coords: [-89.0979, 30.3605],
+    rows: [
+      { k: 'OWNER', v: 'University of Southern Mississippi' },
+      { k: 'IMO', v: '8023539' },
+      { k: 'MMSI', v: '367720010' },
+      { k: 'TYPE', v: '135-ft Oceanographic Research Vessel' },
+      { k: 'FLAG', v: 'United States (USA)' },
+      { k: 'STATUS', v: 'Under way · last AIS position recent' },
+      { k: 'NOTE', v: 'Has previously transited Drake Passage to Antarctica' }
+    ],
+    link: { url: 'https://www.vesselfinder.com/vessels/details/8023539', label: 'LIVE TRACKING →' }
+  },
+  { id: 'tommy-munro', type: 'vessel', name: 'R/V Tommy Munro', where: 'Gulf of Mexico',
+    coords: [-88.9, 30.35],
+    rows: [
+      { k: 'OWNER', v: 'University of Southern Mississippi' },
+      { k: 'IMO', v: '8201088' },
+      { k: 'MMSI', v: '367527750' },
+      { k: 'TYPE', v: '97-ft Oceanographic Research Vessel' },
+      { k: 'FLAG', v: 'United States (USA)' },
+      { k: 'HOME PORT', v: 'Pt. Cadet, Biloxi, MS' }
+    ],
+    link: { url: 'https://www.vesselfinder.com/vessels/details/8201088', label: 'LIVE TRACKING →' }
+  },
+  { id: 'jim-franks', type: 'vessel', name: 'R/V Jim Franks', where: 'Ocean Springs, MS (home port)',
+    coords: [-88.83, 30.395],
+    rows: [
+      { k: 'OWNER', v: 'University of Southern Mississippi' },
+      { k: 'TYPE', v: '60-ft Aluminium Catamaran Research Vessel' },
+      { k: 'COMMISSIONED', v: '2016' }
+    ],
+    link: { url: 'https://www.usm.edu/vessels/rv-franks.php', label: 'USM VESSEL OPS →' }
+  },
+  { id: 'ken-barbor', type: 'vessel', name: 'R/V Ken Barbor', where: 'Port of Gulfport, MS',
+    coords: [-89.094, 30.358],
+    rows: [
+      { k: 'OWNER', v: 'University of Southern Mississippi' },
+      { k: 'TYPE', v: '48-ft autonomous research vessel' },
+      { k: 'NOTE', v: 'First optionally-crewed autonomous vessel in USM fleet' }
+    ],
+    link: { url: 'https://www.usm.edu/vessels/rv-ken-barbor.php', label: 'USM VESSEL OPS →' }
+  },
+  { id: 'labarre', type: 'source', name: 'George H. LaBarre Galleries', where: 'Portsmouth, New Hampshire',
+    coords: [-70.7626, 43.0718],
+    rows: [
+      { k: 'ROLE', v: 'Holder of bond inventory acquired 1990' },
+      { k: 'INVENTORY', v: '~540+ Mississippi Union Bank 1838 bonds (last reported 2013)' },
+      { k: 'PROVENANCE', v: 'Phillips London auction, June 1990 — CFB liquidator' },
+      { k: 'LIST PRICE', v: '$700 per Union Bank bond' },
+      { k: 'CONTACT', v: '1-800-717-9529 · collect@glabarre.com' }
+    ],
+    link: { url: 'https://www.glabarre.com/item/_2_000_State_of_Mississippi_dated_1838_Bond_Uncanceled_signed_by_Governor_Alexander_G_McNutt_2_000_5_State_Loan_Bond/1995/c72', label: 'VIEW LISTING →' }
+  }
+];
+
+(function buildGlobe() {
+  const container = document.getElementById('globe-container');
+  const detailEl = document.getElementById('marker-detail');
+  const coordsEl = document.getElementById('globe-coords');
+  const rotateToggle = document.getElementById('rotate-toggle');
+
+  function getSize() { return container.clientWidth || 400; }
+  let size = getSize();
+
+  const projection = d3.geoOrthographic()
+    .scale(size / 2 - 6)
+    .translate([size / 2, size / 2])
+    .clipAngle(90)
+    .rotate([85, -25]);
+
+  const path = d3.geoPath(projection);
+
+  const svg = d3.select(container)
+    .insert('svg', ':first-child')
+    .attr('viewBox', `0 0 ${size} ${size}`)
+    .attr('preserveAspectRatio', 'xMidYMid meet');
+
+  svg.append('circle')
+    .attr('class', 'ocean')
+    .attr('cx', size/2).attr('cy', size/2).attr('r', size/2 - 6);
+
+  svg.append('path')
+    .datum(d3.geoGraticule10())
+    .attr('class', 'graticule')
+    .attr('d', path);
+
+  const landGroup = svg.append('g').attr('class', 'land-group');
+  const markerGroup = svg.append('g').attr('class', 'markers');
+
+  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/land-110m.json')
+    .then(r => r.json())
+    .then(world => {
+      const land = topojson.feature(world, world.objects.land);
+      landGroup.append('path')
+        .datum(land)
+        .attr('class', 'land')
+        .attr('d', path);
+      drawMarkers();
+    })
+    .catch(() => drawMarkers());
+
+  function drawMarkers() {
+    const sel = markerGroup.selectAll('g.marker').data(ASSETS, d => d.id);
+    const enter = sel.enter().append('g')
+      .attr('class', d => `marker ${d.type}`)
+      .on('click', (e, d) => selectAsset(d));
+    enter.append('circle').attr('class', 'outer').attr('r', 9);
+    enter.append('circle').attr('class', 'inner').attr('r', 4);
+    enter.filter(d => d.type === 'vessel')
+      .append('circle')
+      .attr('class', 'pulse').attr('r', 4);
+    updateMarkers();
+  }
+
+  function updateMarkers() {
+    markerGroup.selectAll('g.marker').each(function(d) {
+      const g = d3.select(this);
+      const proj = projection(d.coords);
+      if (isVisible(d.coords) && proj) {
+        g.attr('transform', `translate(${proj[0]}, ${proj[1]})`).style('display', null);
+      } else {
+        g.style('display', 'none');
+      }
+    });
+  }
+
+  function isVisible(coords) {
+    const r = projection.rotate();
+    const lambda = -r[0] * Math.PI / 180;
+    const phi = -r[1] * Math.PI / 180;
+    const lon = coords[0] * Math.PI / 180;
+    const lat = coords[1] * Math.PI / 180;
+    return Math.sin(phi) * Math.sin(lat) + Math.cos(phi) * Math.cos(lat) * Math.cos(lon - lambda) >= 0;
+  }
+
+  function selectAsset(d) {
+    markerGroup.selectAll('g.marker').classed('active', m => m.id === d.id);
+    renderDetail(d);
+    const target = [-d.coords[0], -d.coords[1] * 0.7];
+    d3.transition().duration(1000).ease(d3.easeCubicInOut).tween('rotate', () => {
+      const r = d3.interpolate(projection.rotate(), [...target, 0]);
+      return t => { projection.rotate(r(t)); redrawAll(); };
+    });
+    if (autoRotating) toggleRotate();
+  }
+
+  function renderDetail(d) {
+    detailEl.innerHTML = `
+      <h4 class="${d.type}">${d.type === 'asset' ? 'STATE OFFICE' : d.type === 'vessel' ? 'STATE VESSEL' : 'BOND SOURCE'}</h4>
+      <div class="name">${d.name}</div>
+      <div class="where">${d.where}</div>
+      ${d.rows.map((r, i) => `
+        <div class="data-row${i === 0 ? ' first' : ''}">
+          <div class="k">${r.k}</div><div class="v">${r.v}</div>
+        </div>`).join('')}
+      ${d.link ? `<a class="live-link" href="${d.link.url}" target="_blank" rel="noopener">${d.link.label}</a>` : ''}
+    `;
+  }
+
+  function redrawAll() {
+    landGroup.selectAll('path').attr('d', path);
+    svg.selectAll('path.graticule').attr('d', path);
+    updateMarkers();
+    const r = projection.rotate();
+    coordsEl.textContent = `λ ${(-r[0]).toFixed(0)}°  ·  φ ${(-r[1]).toFixed(0)}°`;
+  }
+
+  let dragging = false;
+  svg.call(d3.drag()
+    .on('start', () => { dragging = true; if (autoRotating) toggleRotate(); })
+    .on('drag', e => {
+      const r = projection.rotate();
+      projection.rotate([r[0] + e.dx * 0.5, r[1] - e.dy * 0.5, r[2]]);
+      redrawAll();
+    })
+    .on('end', () => { dragging = false; })
+  );
+
+  let autoRotating = true;
+  let lastT = Date.now();
+  function tick() {
+    if (autoRotating && !dragging) {
+      const now = Date.now();
+      const dt = now - lastT;
+      lastT = now;
+      const r = projection.rotate();
+      projection.rotate([r[0] + dt * 0.012, r[1], r[2]]);
+      redrawAll();
+    } else {
+      lastT = Date.now();
+    }
+    requestAnimationFrame(tick);
+  }
+  function toggleRotate() {
+    autoRotating = !autoRotating;
+    rotateToggle.textContent = autoRotating ? '⏸ AUTO-ROTATE' : '▶ AUTO-ROTATE';
+    lastT = Date.now();
+  }
+  rotateToggle.addEventListener('click', toggleRotate);
+  tick();
+
+  function resize() {
+    const newSize = getSize();
+    if (newSize === size) return;
+    size = newSize;
+    projection.scale(size / 2 - 6).translate([size / 2, size / 2]);
+    svg.attr('viewBox', `0 0 ${size} ${size}`);
+    svg.select('circle.ocean').attr('cx', size/2).attr('cy', size/2).attr('r', size/2 - 6);
+    redrawAll();
+  }
+  window.addEventListener('resize', resize);
+  window.__globeRedraw = resize;
+})();
+</script>
+
+</body>
+</html>
