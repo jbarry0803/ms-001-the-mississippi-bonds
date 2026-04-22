@@ -439,20 +439,29 @@
 
   .globe-wrap {
     position: relative; aspect-ratio: 1;
-    background: radial-gradient(circle at 30% 30%, #1a1410 0%, #0a0805 75%);
-    border: 1px solid var(--line-2);
+    background: radial-gradient(circle at 30% 30%, #0a1828 0%, #02060d 75%);
+    border: 1px solid rgba(120, 180, 240, 0.18);
     border-radius: 50%;
     overflow: hidden; cursor: grab;
+    box-shadow:
+      0 0 90px rgba(120, 180, 240, 0.14),
+      0 0 45px rgba(80, 140, 220, 0.18),
+      0 0 18px rgba(140, 195, 245, 0.22);
   }
   .globe-wrap:active { cursor: grabbing; }
-  .globe-wrap svg { display: block; width: 100%; height: 100%; }
-  .globe-wrap .ocean { fill: #0a0e14; }
+  .globe-wrap svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .globe-wrap .ocean { /* fill set via SVG attr -> url(#ocean-gradient) */ }
   .globe-wrap .graticule {
-    fill: none; stroke: rgba(240, 231, 212, 0.06); stroke-width: 0.5;
+    fill: none; stroke: rgba(255, 255, 255, 0.07); stroke-width: 0.5;
+    pointer-events: none;
   }
   .globe-wrap .land {
-    fill: rgba(240, 231, 212, 0.78);
-    stroke: rgba(13, 10, 8, 0.4); stroke-width: 0.4;
+    fill: url(#land-gradient);
+    stroke: rgba(20, 35, 15, 0.55); stroke-width: 0.4;
+  }
+  .globe-wrap .shading {
+    fill: url(#shading-gradient);
+    pointer-events: none;
   }
   .globe-wrap .marker { cursor: pointer; }
   .globe-wrap .marker circle.outer { fill: none; stroke-width: 1.2; opacity: 0.5; }
@@ -484,8 +493,8 @@
   /* Country borders */
   .globe-wrap .country-border {
     fill: none;
-    stroke: rgba(13, 10, 8, 0.35);
-    stroke-width: 0.3;
+    stroke: rgba(0, 0, 0, 0.28);
+    stroke-width: 0.35;
     pointer-events: none;
   }
 
@@ -856,6 +865,26 @@
     z-index: 5000; pointer-events: none;
   }
   .copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Finance chart */
+  .finance-chart {
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+    display: block;
+    margin: 1rem 0 2rem;
+  }
+  .finance-chart text { font-family: var(--font-mono); }
+
+  /* Ice caps */
+  .globe-wrap .ice-cap {
+    fill: rgba(245, 250, 255, 0.92);
+    stroke: rgba(180, 200, 220, 0.4);
+    stroke-width: 0.4;
+    pointer-events: none;
+  }
+  /* Sun glint on ocean */
+  .globe-wrap .sun-glint { pointer-events: none; }
 </style>
 </head>
 <body>
@@ -899,8 +928,9 @@
     <button class="tab" data-tab="history"><span class="tab-num">02</span>History</button>
     <button class="tab" data-tab="acquire"><span class="tab-num">03</span>Acquire</button>
     <button class="tab" data-tab="audit"><span class="tab-num">04</span>Asset Audit</button>
-    <button class="tab" data-tab="verdict"><span class="tab-num">05</span>Verdict</button>
-    <button class="tab" data-tab="sources"><span class="tab-num">06</span>Sources</button>
+    <button class="tab" data-tab="finance"><span class="tab-num">05</span>Finance</button>
+    <button class="tab" data-tab="verdict"><span class="tab-num">06</span>Verdict</button>
+    <button class="tab" data-tab="sources"><span class="tab-num">07</span>Sources</button>
   </div>
 </nav>
 
@@ -1225,7 +1255,195 @@ Thanks,
     </div>
   </section>
 
-  <!-- 05 VERDICT -->
+  <!-- 05 FINANCE -->
+  <section class="panel" data-panel="finance">
+    <h2>What the bonds <strong>actually owe</strong></h2>
+    <p class="dim" style="max-width: 70ch; margin-bottom: 2rem;">
+      The audit told you what Mississippi has. This tells you what it owes — and the gap, after 188 years of unpaid coupons, between the legal answer (zero) and the mathematical one (catastrophic).
+    </p>
+
+    <div class="overview-grid">
+      <div>
+        <h3>The Principal · what was issued</h3>
+        <div class="audit-table" style="margin-bottom: 2rem;">
+          <div class="audit-row">
+            <div class="what">1831–33 Planters Bank<span class="sub">$2.0M issue · 6% coupon · placed in US &amp; London</span></div>
+            <div class="verdict us">$2,000,000</div>
+          </div>
+          <div class="audit-row">
+            <div class="what">1838 Union Bank<span class="sub">$5.0M issue · 5% coupon · payable in London</span></div>
+            <div class="verdict us">$5,000,000</div>
+          </div>
+          <div class="audit-row">
+            <div class="what">Total face value<span class="sub">Weighted-average coupon ≈ 5.286%</span></div>
+            <div class="verdict owned">$7,000,000</div>
+          </div>
+        </div>
+
+        <h3>The Compounding · 188 years on a single $2,000 bond</h3>
+        <p class="dim">Three ways to compute what one $2,000 Union Bank bond owes today, depending on which century's interest convention you apply:</p>
+        <div class="audit-table" style="margin-bottom: 2rem;">
+          <div class="audit-row">
+            <div class="what">Principal only<span class="sub">No interest, just the original face — the lowest-friction interpretation</span></div>
+            <div class="verdict us">$2,000</div>
+          </div>
+          <div class="audit-row">
+            <div class="what">Simple interest @ 5%<span class="sub">$2,000 × (1 + 188 × 0.05) — straight coupon accrual, no reinvestment</span></div>
+            <div class="verdict leased">$20,800</div>
+          </div>
+          <div class="audit-row">
+            <div class="what">Compound @ 5% annually<span class="sub">$2,000 × 1.05<sup>188</sup> = 9,629× — coupon reinvested at coupon rate</span></div>
+            <div class="verdict owned">$19,258,312</div>
+          </div>
+        </div>
+
+        <h3>The Curve</h3>
+        <svg viewBox="0 0 440 220" xmlns="http://www.w3.org/2000/svg" class="finance-chart" aria-label="Compound value of one $2,000 Union Bank bond, 1838 to 2026, log scale">
+          <defs>
+            <linearGradient id="curve-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="rgba(198, 55, 38, 0.32)"/>
+              <stop offset="100%" stop-color="rgba(198, 55, 38, 0)"/>
+            </linearGradient>
+          </defs>
+
+          <!-- BG panel -->
+          <rect x="0" y="0" width="440" height="220" fill="rgba(13, 10, 8, 0.5)" stroke="rgba(240, 231, 212, 0.10)" rx="2"/>
+
+          <!-- Title -->
+          <text x="20" y="22" font-size="9" fill="#9c8e75" letter-spacing="1.6" text-transform="uppercase">$2,000 BOND · COMPOUNDED @ 5% · LOG SCALE</text>
+
+          <!-- Y-axis labels (log $2K → $20M) -->
+          <g font-size="8" fill="#5a4f3f" text-anchor="end">
+            <text x="50" y="54">$20M</text>
+            <text x="50" y="86">$2M</text>
+            <text x="50" y="118">$200K</text>
+            <text x="50" y="150">$20K</text>
+            <text x="50" y="182">$2K</text>
+          </g>
+
+          <!-- Grid -->
+          <g stroke="rgba(240, 231, 212, 0.05)" stroke-width="0.5" stroke-dasharray="2 3">
+            <line x1="55" y1="50" x2="425" y2="50"/>
+            <line x1="55" y1="82" x2="425" y2="82"/>
+            <line x1="55" y1="114" x2="425" y2="114"/>
+            <line x1="55" y1="146" x2="425" y2="146"/>
+            <line x1="55" y1="178" x2="425" y2="178"/>
+          </g>
+
+          <!-- Filled area under curve -->
+          <path d="M 55 178 L 425 50.5 L 425 178 Z" fill="url(#curve-fill)"/>
+
+          <!-- Compound curve (linear on log y) -->
+          <line x1="55" y1="178" x2="425" y2="50.5" stroke="#c63726" stroke-width="2"/>
+
+          <!-- Event markers -->
+          <g>
+            <!-- 1842 default -->
+            <line x1="62.9" y1="175.3" x2="62.9" y2="186" stroke="#c89432" stroke-width="0.8"/>
+            <circle cx="62.9" cy="175.3" r="2.5" fill="#c89432" stroke="#0d0a08" stroke-width="0.8"/>
+            <text x="62.9" y="200" text-anchor="middle" font-size="7" fill="#c89432">1842</text>
+            <text x="62.9" y="210" text-anchor="middle" font-size="6" fill="#5a4f3f">DEFAULT</text>
+
+            <!-- 1875 constitutional bar -->
+            <line x1="127.8" y1="152.9" x2="127.8" y2="186" stroke="#c89432" stroke-width="0.8" opacity="0.5"/>
+            <circle cx="127.8" cy="152.9" r="2.5" fill="#c89432" stroke="#0d0a08" stroke-width="0.8"/>
+            <text x="127.8" y="200" text-anchor="middle" font-size="7" fill="#c89432">1875</text>
+            <text x="127.8" y="210" text-anchor="middle" font-size="6" fill="#5a4f3f">CONST. BAR</text>
+
+            <!-- 1990 CFB auction -->
+            <line x1="354.1" y1="74.9" x2="354.1" y2="186" stroke="#c89432" stroke-width="0.8" opacity="0.4"/>
+            <circle cx="354.1" cy="74.9" r="2.5" fill="#c89432" stroke="#0d0a08" stroke-width="0.8"/>
+            <text x="354.1" y="200" text-anchor="middle" font-size="7" fill="#c89432">1990</text>
+            <text x="354.1" y="210" text-anchor="middle" font-size="6" fill="#5a4f3f">CFB AUCTION</text>
+
+            <!-- 2026 today -->
+            <circle cx="425" cy="50.5" r="4" fill="#c63726" stroke="#0d0a08" stroke-width="1.5"/>
+            <text x="420" y="42" text-anchor="end" font-size="9" font-weight="600" fill="#c63726">$19.3M</text>
+            <text x="425" y="200" text-anchor="end" font-size="7" fill="#f0e7d4">2026</text>
+            <text x="425" y="210" text-anchor="end" font-size="6" fill="#5a4f3f">TODAY</text>
+          </g>
+
+          <!-- Axes -->
+          <line x1="55" y1="40" x2="55" y2="178" stroke="rgba(240, 231, 212, 0.18)" stroke-width="0.5"/>
+          <line x1="55" y1="178" x2="425" y2="178" stroke="rgba(240, 231, 212, 0.18)" stroke-width="0.5"/>
+        </svg>
+
+        <h3>The Whole Issue · compounded</h3>
+        <p>If you apply the same compounding to the entire $7M, accounting for each issue's actual coupon, the math runs to:</p>
+        <div class="audit-table" style="margin-bottom: 2rem;">
+          <div class="audit-row">
+            <div class="what">Planters Bank · $2M @ 6%<span class="sub">$2M × 1.06<sup>188</sup></span></div>
+            <div class="verdict us">$114.4B</div>
+          </div>
+          <div class="audit-row">
+            <div class="what">Union Bank · $5M @ 5%<span class="sub">$5M × 1.05<sup>188</sup></span></div>
+            <div class="verdict us">$48.2B</div>
+          </div>
+          <div class="audit-row">
+            <div class="what">Combined theoretical claim<span class="sub">at the bonds' own coupon rates</span></div>
+            <div class="verdict owned">$162.6B</div>
+          </div>
+        </div>
+        <p class="dim">For perspective: Mississippi's entire FY2024 General Fund is around $7B. The compounded claim, taken at face, exceeds <strong>23 years</strong> of total state spending.</p>
+
+        <h3>The Inflation Floor · the boring number</h3>
+        <p>$2,000 in 1838 dollars equals roughly <strong>$70,000</strong> in 2026 dollars at long-run CPI (~35× over 188 years). This is what one bond would be worth if you stripped the coupon entirely and just preserved purchasing power.</p>
+        <p class="dim">The point of the contrast: <strong>most of the headline compounded number is unpaid interest, not inflation.</strong> The state didn't lose value to time. It lost it to refusing to pay.</p>
+
+        <h3>The Recovery History · what was actually paid</h3>
+        <p>Across 185 years: <strong>$0 from Mississippi.</strong> The Council of Foreign Bondholders in London pursued the matter for over a century and recovered more from czarist Russian railway bonds than from Jackson. Their inventory was liquidated at the Phillips London auction in 1990 — at collector prices, not face. The only realised "yield" the paper has ever had is the secondary collector market, exactly what Clifford Thies meant in the History pullquote.</p>
+      </div>
+
+      <div>
+        <h3>Headline Figures</h3>
+        <div class="overview-stats">
+          <div class="stat-row headline">
+            <div class="k">Compounded claim · per bond</div>
+            <div class="v">$19.3M</div>
+          </div>
+          <div class="stat-row">
+            <div class="k">Simple-interest claim · per bond</div>
+            <div class="v">$20,800</div>
+          </div>
+          <div class="stat-row">
+            <div class="k">Whole $7M issue · compounded</div>
+            <div class="v">$162.6B</div>
+          </div>
+          <div class="stat-row">
+            <div class="k">540-bond LaBarre lot · cost</div>
+            <div class="v">$378K</div>
+          </div>
+          <div class="stat-row headline">
+            <div class="k">Same lot · theoretical claim</div>
+            <div class="v">$10.4B</div>
+          </div>
+          <div class="stat-row warn">
+            <div class="k">Cost-to-claim ratio</div>
+            <div class="v">≈ 1 : 27,500</div>
+          </div>
+          <div class="stat-row">
+            <div class="k">Inflation-adjusted floor</div>
+            <div class="v">$70K / bond</div>
+          </div>
+          <div class="stat-row warn">
+            <div class="k">Years since last payment</div>
+            <div class="v">185</div>
+          </div>
+          <div class="stat-row warn">
+            <div class="k">Mississippi will pay</div>
+            <div class="v">$0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pullquote" style="max-width: 900px; margin: 3rem auto 0; text-align: center;">
+      The bonds owe, mathematically, somewhere between $20,800 and $19.3 million apiece, depending on which century's interest convention you apply. Mississippi will pay none of it.
+      <span class="attr">— the financial story is the gap between the math and the politics</span>
+    </div>
+  </section>
+
+  <!-- 06 VERDICT -->
   <section class="panel" data-panel="verdict">
     <h2>The <strong>honest verdict</strong></h2>
     <p class="dim" style="max-width: 70ch; margin-bottom: 2rem;">Combining the legal framework, the ownership audit, and the asset register — where this leaves a revival effort.</p>
@@ -1290,7 +1508,7 @@ Thanks,
     </div>
   </section>
 
-  <!-- 06 SOURCES -->
+  <!-- 07 SOURCES -->
   <section class="panel" data-panel="sources">
     <h2>Annex — <strong>sources</strong></h2>
     <p class="dim" style="max-width: 70ch; margin-bottom: 2rem;">Every claim above traces to public records, dealer listings, scholarly articles, financial statements, or live AIS data. Verify freely.</p>
@@ -1586,19 +1804,60 @@ const ASSETS = [
     .attr('preserveAspectRatio', 'xMidYMid meet');
 
   const defs = svg.append('defs');
+
+  // Multi-stop atmospheric ring — bright cyan inner, soft blue mid, fade outer.
+  // Stops calibrated for the SVG circle that's CSS-scaled to 1.06× — globe limb sits at ~94%.
   const atmGrad = defs.append('radialGradient')
     .attr('id', 'atmosphere-gradient')
-    .attr('cx', '50%').attr('cy', '50%').attr('r', '52%');
-  atmGrad.append('stop').attr('offset', '88%').attr('stop-color', 'rgba(232, 146, 114, 0)');
-  atmGrad.append('stop').attr('offset', '95%').attr('stop-color', 'rgba(232, 146, 114, 0.18)');
-  atmGrad.append('stop').attr('offset', '100%').attr('stop-color', 'rgba(232, 146, 114, 0)');
+    .attr('cx', '50%').attr('cy', '50%').attr('r', '54%');
+  atmGrad.append('stop').attr('offset', '93%').attr('stop-color', 'rgba(140, 200, 255, 0)');
+  atmGrad.append('stop').attr('offset', '95%').attr('stop-color', 'rgba(140, 200, 255, 0.55)');
+  atmGrad.append('stop').attr('offset', '98%').attr('stop-color', 'rgba(80, 140, 220, 0.25)');
+  atmGrad.append('stop').attr('offset', '100%').attr('stop-color', 'rgba(40, 80, 160, 0)');
 
+  // Deep blue ocean — lit upper-left, fading to dark abyss
   const oceanGrad = defs.append('radialGradient')
     .attr('id', 'ocean-gradient')
-    .attr('cx', '35%').attr('cy', '32%').attr('r', '70%');
-  oceanGrad.append('stop').attr('offset', '0%').attr('stop-color', '#142028');
-  oceanGrad.append('stop').attr('offset', '60%').attr('stop-color', '#0a0e14');
-  oceanGrad.append('stop').attr('offset', '100%').attr('stop-color', '#04060a');
+    .attr('cx', '35%').attr('cy', '32%').attr('r', '72%');
+  oceanGrad.append('stop').attr('offset', '0%').attr('stop-color', '#1f5a8a');
+  oceanGrad.append('stop').attr('offset', '55%').attr('stop-color', '#0e2c4c');
+  oceanGrad.append('stop').attr('offset', '100%').attr('stop-color', '#04101f');
+
+  // Sun glint — small soft white highlight on lit ocean
+  const glintGrad = defs.append('radialGradient')
+    .attr('id', 'glint-gradient')
+    .attr('cx', '50%').attr('cy', '50%').attr('r', '50%');
+  glintGrad.append('stop').attr('offset', '0%').attr('stop-color', 'rgba(255, 255, 240, 0.18)');
+  glintGrad.append('stop').attr('offset', '55%').attr('stop-color', 'rgba(255, 255, 240, 0.06)');
+  glintGrad.append('stop').attr('offset', '100%').attr('stop-color', 'rgba(255, 255, 240, 0)');
+
+  // Latitude-banded terrain (vertical linear in user space): polar grey-white →
+  // temperate green → subtropical tan → equatorial olive, mirrored south.
+  // Approximates biome shading; aligns with screen-y when rotation φ ≈ 0.
+  const landGrad = defs.append('linearGradient')
+    .attr('id', 'land-gradient')
+    .attr('gradientUnits', 'userSpaceOnUse')
+    .attr('x1', 0).attr('y1', 0)
+    .attr('x2', 0).attr('y2', size);
+  landGrad.append('stop').attr('offset', '0%').attr('stop-color', '#b8c4c0');
+  landGrad.append('stop').attr('offset', '12%').attr('stop-color', '#7d8a78');
+  landGrad.append('stop').attr('offset', '22%').attr('stop-color', '#4a6049');
+  landGrad.append('stop').attr('offset', '36%').attr('stop-color', '#8a7a4f');
+  landGrad.append('stop').attr('offset', '50%').attr('stop-color', '#3d5a2a');
+  landGrad.append('stop').attr('offset', '64%').attr('stop-color', '#8a7a4f');
+  landGrad.append('stop').attr('offset', '78%').attr('stop-color', '#4a6049');
+  landGrad.append('stop').attr('offset', '88%').attr('stop-color', '#7d8a78');
+  landGrad.append('stop').attr('offset', '100%').attr('stop-color', '#b8c4c0');
+
+  // Offset directional shading — light source upper-left at (30%, 25%),
+  // terminator falls across lower-right rim.
+  const shadingGrad = defs.append('radialGradient')
+    .attr('id', 'shading-gradient')
+    .attr('cx', '30%').attr('cy', '25%').attr('r', '110%');
+  shadingGrad.append('stop').attr('offset', '0%').attr('stop-color', 'rgba(0, 0, 10, 0)');
+  shadingGrad.append('stop').attr('offset', '40%').attr('stop-color', 'rgba(0, 0, 10, 0.06)');
+  shadingGrad.append('stop').attr('offset', '70%').attr('stop-color', 'rgba(0, 0, 10, 0.32)');
+  shadingGrad.append('stop').attr('offset', '100%').attr('stop-color', 'rgba(0, 0, 10, 0.55)');
 
   // Outer atmosphere glow (drawn first, behind everything)
   svg.append('circle')
@@ -1614,6 +1873,13 @@ const ASSETS = [
     .attr('cx', size/2).attr('cy', size/2).attr('r', size/2 - 6)
     .attr('fill', 'url(#ocean-gradient)');
 
+  // Sun glint — soft white highlight on the lit ocean
+  svg.append('circle')
+    .attr('class', 'sun-glint')
+    .attr('cx', size * 0.30).attr('cy', size * 0.25)
+    .attr('r', size * 0.16)
+    .attr('fill', 'url(#glint-gradient)');
+
   // Graticule
   svg.append('path')
     .datum(d3.geoGraticule10())
@@ -1622,16 +1888,16 @@ const ASSETS = [
 
   const landGroup = svg.append('g').attr('class', 'land-group');
   const borderGroup = svg.append('g').attr('class', 'border-group');
+  const iceGroup = svg.append('g').attr('class', 'ice-group');
+
+  // 3D shading overlay — sits ABOVE land/borders, BELOW markers, non-interactive
+  svg.append('circle')
+    .attr('class', 'shading')
+    .attr('cx', size/2).attr('cy', size/2).attr('r', size/2 - 6);
+
   const markerGroup = svg.append('g').attr('class', 'markers');
 
-  // Inner shading for terminator (back hemisphere darkness)
-  svg.append('circle')
-    .attr('class', 'terminator')
-    .attr('cx', size/2).attr('cy', size/2).attr('r', size/2 - 6)
-    .attr('fill', 'none')
-    .attr('stroke', 'rgba(0, 0, 0, 0.4)')
-    .attr('stroke-width', '4')
-    .style('pointer-events', 'none');
+  // (limb darkening now handled by the .shading overlay above)
 
   Promise.all([
     fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/land-110m.json').then(r => r.json()),
@@ -1648,6 +1914,13 @@ const ASSETS = [
       .datum(borders)
       .attr('class', 'country-border')
       .attr('d', path);
+
+    // Polar ice caps — overlay after land so ice sits on top of high-latitude terrain.
+    // Arctic cap covers Greenland and the Arctic ocean ice; Antarctic mirrors south.
+    const arcticCap = d3.geoCircle().center([0, 90]).radius(28)();
+    const antarcticCap = d3.geoCircle().center([0, -90]).radius(28)();
+    iceGroup.append('path').datum(arcticCap).attr('class', 'ice-cap arctic').attr('d', path);
+    iceGroup.append('path').datum(antarcticCap).attr('class', 'ice-cap antarctic').attr('d', path);
 
     drawMarkers();
   }).catch(() => drawMarkers());
@@ -1754,7 +2027,7 @@ const ASSETS = [
     const startRotate = projection.rotate();
     const interpRotate = d3.interpolate(startRotate, targetRotate);
 
-    d3.transition().duration(1100).ease(d3.easeCubicInOut).tween('flyto', () => {
+    d3.transition().duration(900).ease(d3.easeCubicInOut).tween('flyto', () => {
       return t => {
         zoomFactor = startZoom + (targetZoom - startZoom) * t;
         projection.scale(baseScale());
@@ -1786,37 +2059,144 @@ const ASSETS = [
   function redrawAll() {
     landGroup.selectAll('path').attr('d', path);
     borderGroup.selectAll('path').attr('d', path);
+    iceGroup.selectAll('path').attr('d', path);
     svg.selectAll('path.graticule').attr('d', path);
     updateMarkers();
     const r = projection.rotate();
     coordsEl.textContent = `λ ${(-r[0]).toFixed(0)}°  ·  φ ${(-r[1]).toFixed(0)}°  ·  ×${zoomFactor.toFixed(1)}`;
   }
 
-  // Drag
+  // ─── Versor utilities (inlined from d3-versor; minimal surface) ───────────
+  function vCart([λ, φ]) {
+    λ *= Math.PI / 180; φ *= Math.PI / 180;
+    const cp = Math.cos(φ);
+    return [cp * Math.cos(λ), cp * Math.sin(λ), Math.sin(φ)];
+  }
+  function vMul([a,b,c,d], [e,f,g,h]) {
+    return [
+      a*e - b*f - c*g - d*h,
+      a*f + b*e + c*h - d*g,
+      a*g - b*h + c*e + d*f,
+      a*h + b*g - c*f + d*e
+    ];
+  }
+  function vToAngles([a,b,c,d]) {
+    return [
+      Math.atan2(2 * (a*b + c*d), 1 - 2 * (b*b + c*c)) * 180/Math.PI,
+      Math.asin(Math.max(-1, Math.min(1, 2 * (a*c - b*d)))) * 180/Math.PI,
+      Math.atan2(2 * (a*d + b*c), 1 - 2 * (c*c + d*d)) * 180/Math.PI
+    ];
+  }
+  function vFromAngles([λ, φ, γ]) {
+    λ *= Math.PI/360; φ *= Math.PI/360; γ *= Math.PI/360;
+    const sl = Math.sin(λ), cl = Math.cos(λ);
+    const sp = Math.sin(φ), cp = Math.cos(φ);
+    const sg = Math.sin(γ), cg = Math.cos(γ);
+    return [
+      cl*cp*cg + sl*sp*sg,
+      sl*cp*cg - cl*sp*sg,
+      cl*sp*cg + sl*cp*sg,
+      cl*cp*sg - sl*sp*cg
+    ];
+  }
+  function vDelta([x1,y1,z1], [x2,y2,z2]) {
+    const w = [y1*z2 - z1*y2, z1*x2 - x1*z2, x1*y2 - y1*x2];
+    const wn = Math.hypot(w[0], w[1], w[2]);
+    if (wn < 1e-12) return [1, 0, 0, 0];
+    const t = Math.acos(Math.max(-1, Math.min(1, x1*x2 + y1*y2 + z1*z2)));
+    const s = Math.sin(t/2) / wn;
+    return [Math.cos(t/2), s*w[0], s*w[1], s*w[2]];
+  }
+
+  // ─── Versor-based drag (point under cursor stays under cursor) ────────────
   let dragging = false;
+  let v0, q0, r0;
+  let velocity = [0, 0];
+  let velocityHistory = [];
+  let momentumActive = false;
+  let resumeAutoRotateAfterMomentum = false;
+
   svg.call(d3.drag()
-    .on('start', () => { dragging = true; if (autoRotating) toggleRotate(); })
-    .on('drag', e => {
-      const r = projection.rotate();
-      const k = 0.5 / zoomFactor; // slower rotation when zoomed in
-      projection.rotate([r[0] + e.dx * k, r[1] - e.dy * k, r[2]]);
+    .on('start', (event) => {
+      momentumActive = false;
+      resumeAutoRotateAfterMomentum = autoRotating;
+      if (autoRotating) toggleRotate();
+      const inv = projection.invert([event.x, event.y]);
+      if (!inv || isNaN(inv[0]) || isNaN(inv[1])) { v0 = q0 = r0 = null; return; }
+      v0 = vCart(inv);
+      r0 = projection.rotate();
+      q0 = vFromAngles(r0);
+      velocityHistory = [];
+      dragging = true;
+    })
+    .on('drag', (event) => {
+      if (!v0) return;
+      const inv = projection.rotate(r0).invert([event.x, event.y]);
+      if (!inv || isNaN(inv[0]) || isNaN(inv[1])) return;
+      const v1 = vCart(inv);
+      const q1 = vMul(q0, vDelta(v0, v1));
+      const newRot = vToAngles(q1);
+      const prev = projection.rotate();
+      velocityHistory.push({
+        time: performance.now(),
+        dλ: newRot[0] - prev[0],
+        dφ: newRot[1] - prev[1]
+      });
+      // Trim to last 100ms of motion for clean release-velocity estimate
+      while (velocityHistory.length && performance.now() - velocityHistory[0].time > 100) {
+        velocityHistory.shift();
+      }
+      projection.rotate(newRot);
       redrawAll();
     })
-    .on('end', () => { dragging = false; })
+    .on('end', () => {
+      dragging = false;
+      if (velocityHistory.length >= 2) {
+        const recent = velocityHistory.slice(-Math.min(5, velocityHistory.length));
+        const sumDλ = recent.reduce((s, v) => s + v.dλ, 0);
+        const sumDφ = recent.reduce((s, v) => s + v.dφ, 0);
+        const span = (recent[recent.length-1].time - recent[0].time) + 16;
+        const vx = sumDλ * 16 / span;
+        const vy = sumDφ * 16 / span;
+        if (Math.hypot(vx, vy) > 0.05) {
+          velocity = [vx, vy];
+          momentumActive = true;
+        } else if (resumeAutoRotateAfterMomentum && !autoRotating) {
+          toggleRotate();
+        }
+      } else if (resumeAutoRotateAfterMomentum && !autoRotating) {
+        toggleRotate();
+      }
+      v0 = q0 = r0 = null;
+    })
   );
 
-  // Scroll to zoom
+  // ─── Throttled, continuous wheel zoom ─────────────────────────────────────
+  let pendingZoom = null;
+  let zoomRAF = null;
   container.addEventListener('wheel', e => {
     e.preventDefault();
-    const delta = -Math.sign(e.deltaY) * 0.18;
-    setZoom(zoomFactor * (1 + delta));
+    // Continuous: 1px deltaY ≈ ×0.9985, i.e. ~1.06 per typical tick
+    const factor = Math.exp(-e.deltaY * 0.0015);
+    pendingZoom = (pendingZoom !== null ? pendingZoom : zoomFactor) * factor;
+    pendingZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, pendingZoom));
+    if (!zoomRAF) {
+      zoomRAF = requestAnimationFrame(() => {
+        zoomFactor = pendingZoom;
+        projection.scale(baseScale());
+        redrawAll();
+        pendingZoom = null;
+        zoomRAF = null;
+      });
+    }
   }, { passive: false });
 
+  // ─── Snappier programmatic zoom (button clicks) ───────────────────────────
   function setZoom(z, animate) {
     const target = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z));
     if (animate) {
       const start = zoomFactor;
-      d3.transition().duration(450).ease(d3.easeCubicInOut).tween('zoom', () => t => {
+      d3.transition().duration(150).ease(d3.easeCubicOut).tween('zoom', () => t => {
         zoomFactor = start + (target - start) * t;
         projection.scale(baseScale());
         redrawAll();
@@ -1845,11 +2225,24 @@ const ASSETS = [
     });
   });
 
-  // Auto-rotate
+  // ─── Auto-rotate + momentum tick loop ─────────────────────────────────────
   let autoRotating = true;
   let lastT = Date.now();
   function tick() {
-    if (autoRotating && !dragging) {
+    if (momentumActive && !dragging) {
+      // Exponential decay; resume auto-rotate when momentum dies if it was on
+      velocity[0] *= 0.95;
+      velocity[1] *= 0.95;
+      if (Math.hypot(velocity[0], velocity[1]) < 0.02) {
+        momentumActive = false;
+        if (resumeAutoRotateAfterMomentum && !autoRotating) toggleRotate();
+        lastT = Date.now();
+      } else {
+        const r = projection.rotate();
+        projection.rotate([r[0] + velocity[0], r[1] + velocity[1], r[2]]);
+        redrawAll();
+      }
+    } else if (autoRotating && !dragging) {
       const now = Date.now();
       const dt = now - lastT;
       lastT = now;
@@ -1927,8 +2320,15 @@ const ASSETS = [
     size = newSize;
     projection.scale(baseScale()).translate([size / 2, size / 2]);
     svg.attr('viewBox', `0 0 ${size} ${size}`);
-    svg.selectAll('circle.ocean, circle.atmosphere, circle.terminator')
+    svg.selectAll('circle.ocean, circle.atmosphere, circle.shading')
       .attr('cx', size/2).attr('cy', size/2).attr('r', size/2 - 6);
+    // Reposition the sun glint with the lit-area anchor (30%, 25%)
+    svg.select('circle.sun-glint')
+      .attr('cx', size * 0.30).attr('cy', size * 0.25)
+      .attr('r', size * 0.16);
+    // Linear land gradient spans the SVG viewBox vertically
+    defs.select('#land-gradient')
+      .attr('y2', size);
     redrawAll();
   }
   window.addEventListener('resize', resize);
