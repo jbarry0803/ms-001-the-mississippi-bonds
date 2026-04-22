@@ -1151,8 +1151,8 @@ Thanks,
     <div class="audit-layout">
       <div class="globe-wrap" id="globe-container">
         <div class="globe-zoom-stack">
-          <button class="globe-zoom-btn" id="zoom-in" title="Zoom in">+</button>
-          <button class="globe-zoom-btn" id="zoom-out" title="Zoom out">−</button>
+          <button class="globe-zoom-btn" id="zoom-in" title="Zoom in (or pinch / Shift + scroll)">+</button>
+          <button class="globe-zoom-btn" id="zoom-out" title="Zoom out (or pinch / Shift + scroll)">−</button>
           <button class="globe-zoom-btn" id="zoom-reset" title="Reset view" style="font-size: 0.55rem;">⟲</button>
         </div>
         <div class="globe-controls">
@@ -2171,13 +2171,15 @@ const ASSETS = [
     })
   );
 
-  // ─── Throttled, continuous wheel zoom ─────────────────────────────────────
+  // ─── Wheel zoom: only on explicit gesture, never hijacks page scroll ──────
+  // Trackpad pinch sets ctrlKey automatically; Shift+wheel is the keyboard equivalent.
+  // Plain wheel scrolling passes through to the page.
   let pendingZoom = null;
   let zoomRAF = null;
   container.addEventListener('wheel', e => {
+    if (!e.ctrlKey && !e.shiftKey) return; // let the page scroll
     e.preventDefault();
-    // Continuous: 1px deltaY ≈ ×0.9985, i.e. ~1.06 per typical tick
-    const factor = Math.exp(-e.deltaY * 0.0015);
+    const factor = Math.exp(-e.deltaY * 0.0005); // gentle: ~×1.05 per typical tick
     pendingZoom = (pendingZoom !== null ? pendingZoom : zoomFactor) * factor;
     pendingZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, pendingZoom));
     if (!zoomRAF) {
