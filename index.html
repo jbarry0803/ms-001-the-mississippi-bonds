@@ -443,11 +443,37 @@
     border: 1px solid rgba(120, 180, 240, 0.18);
     border-radius: 50%;
     overflow: hidden; cursor: grab;
+    /* Let the page scroll vertically over the globe on touch devices —
+       the globe only captures horizontal-dominant gestures. */
+    touch-action: pan-y;
     box-shadow:
       0 0 90px rgba(120, 180, 240, 0.14),
       0 0 45px rgba(80, 140, 220, 0.18),
       0 0 18px rgba(140, 195, 245, 0.22);
   }
+
+  /* Subtle UX hint at the top of the globe */
+  .globe-hint {
+    position: absolute;
+    top: 14px; left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    background: rgba(13, 10, 8, 0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    pointer-events: none;
+    z-index: 5;
+    white-space: nowrap;
+    transition: opacity .4s;
+  }
+  .globe-wrap.has-interacted .globe-hint { opacity: 0; }
   .globe-wrap:active { cursor: grabbing; }
   .globe-wrap svg { display: block; width: 100%; height: 100%; overflow: visible; }
   .globe-wrap .ocean { /* fill set via SVG attr -> url(#ocean-gradient) */ }
@@ -1150,9 +1176,10 @@ Thanks,
 
     <div class="audit-layout">
       <div class="globe-wrap" id="globe-container">
+        <div class="globe-hint">Click + drag to rotate · use + / − to zoom</div>
         <div class="globe-zoom-stack">
-          <button class="globe-zoom-btn" id="zoom-in" title="Zoom in (or pinch / Shift + scroll)">+</button>
-          <button class="globe-zoom-btn" id="zoom-out" title="Zoom out (or pinch / Shift + scroll)">−</button>
+          <button class="globe-zoom-btn" id="zoom-in" title="Zoom in">+</button>
+          <button class="globe-zoom-btn" id="zoom-out" title="Zoom out">−</button>
           <button class="globe-zoom-btn" id="zoom-reset" title="Reset view" style="font-size: 0.55rem;">⟲</button>
         </div>
         <div class="globe-controls">
@@ -2108,62 +2135,81 @@ const ASSETS = [
     return [Math.cos(t/2), s*w[0], s*w[1], s*w[2]];
   }
 
-  // ─── Versor-based drag (point under cursor stays under cursor) ────────────
-  // No momentum: globe stops exactly where the user releases. This is what makes
-  // precise navigation feel sane.
+  // ─── Tuning constants for calmer interaction ──────────────────────────────
+  // Cursor must move this many px from mousedown before drag-rotate begins.
+  // Same value passed to clickDistance() below so marker clicks survive a small wiggle.
+  const DRAG_THRESHOLD = 7;
+  // How aggressively the displayed rotation eases toward the drag target each frame.
+  // 1.0 = instant snap (twitchy), 0.15 = mushy. 0.32 reads as smooth but responsive.
+  const ROTATE_DAMPING = 0.32;
+  // Auto-rotate speed in deg/ms. Halved from 0.012 so it reads as "slow drift" not "spin".
+  const AUTO_ROTATE_SPEED = 0.006;
+
+  // ─── Versor-based drag with threshold + damping ───────────────────────────
+  // Drag now sets a TARGET rotation; the tick loop eases the actual projection
+  // rotation toward it. This filters jitter and gives a calmer feel than the
+  // previous instant-snap behavior.
   let dragging = false;
   let v0, q0, r0;
+  let dragStartX = 0, dragStartY = 0;
+  let dragActive = false;        // true once threshold is crossed
+  let targetRotation = null;     // damping target; tick() eases toward this
   let wasAutoRotatingBeforeDrag = false;
+  const hintWrap = document.getElementById('globe-container');
 
   svg.call(d3.drag()
+    // d3 will suppress the underlying click event only if the user moved >= this
+    // many px between mousedown and mouseup. So small wiggle on a marker click
+    // still fires the marker's click handler — drag does not steal it.
+    .clickDistance(DRAG_THRESHOLD)
     .on('start', (event) => {
-      wasAutoRotatingBeforeDrag = autoRotating;
-      if (autoRotating) toggleRotate();  // pause spin while user is interacting
-      const inv = projection.invert([event.x, event.y]);
-      if (!inv || isNaN(inv[0]) || isNaN(inv[1])) { v0 = q0 = r0 = null; return; }
-      v0 = vCart(inv);
-      r0 = projection.rotate();
-      q0 = vFromAngles(r0);
-      dragging = true;
+      // Just record where the gesture started — don't touch the globe yet.
+      dragStartX = event.x;
+      dragStartY = event.y;
+      dragActive = false;
     })
     .on('drag', (event) => {
+      if (!dragActive) {
+        // Below threshold? Do absolutely nothing — feels like a click.
+        const dx = event.x - dragStartX;
+        const dy = event.y - dragStartY;
+        if (Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
+
+        // Threshold crossed — initialize versor state at the CURRENT cursor
+        // position so the rotation feels anchored to where the user really
+        // started dragging, not where they happened to mousedown.
+        dragActive = true;
+        wasAutoRotatingBeforeDrag = autoRotating;
+        if (autoRotating) toggleRotate();
+        const inv = projection.invert([event.x, event.y]);
+        if (!inv || isNaN(inv[0]) || isNaN(inv[1])) return;
+        v0 = vCart(inv);
+        r0 = projection.rotate();
+        q0 = vFromAngles(r0);
+        dragging = true;
+        hintWrap.classList.add('has-interacted'); // fade the hint
+      }
       if (!v0) return;
       const inv = projection.rotate(r0).invert([event.x, event.y]);
       if (!inv || isNaN(inv[0]) || isNaN(inv[1])) return;
       const v1 = vCart(inv);
       const q1 = vMul(q0, vDelta(v0, v1));
-      projection.rotate(vToAngles(q1));
-      redrawAll();
+      // Don't snap — set a target. tick() will ease toward it.
+      targetRotation = vToAngles(q1);
     })
     .on('end', () => {
+      dragActive = false;
       dragging = false;
       v0 = q0 = r0 = null;
-      // Note: auto-rotate does NOT auto-resume. If the user wants spin back on,
-      // they tap the ROTATE button. Keeps the globe predictable.
+      // Leave targetRotation alone so the tick loop settles smoothly to it.
     })
   );
 
-  // ─── Wheel zoom: only on explicit gesture, never hijacks page scroll ──────
-  // Trackpad pinch sets ctrlKey automatically; Shift+wheel is the keyboard equivalent.
-  // Plain wheel scrolling passes through to the page.
+  // Wheel zoom intentionally disabled — it caused too much friction with page
+  // scrolling and direction conventions. Zoom lives on the +/− buttons in the
+  // top-right of the globe and on the quick-jump items in the sidebar.
   let pendingZoom = null;
   let zoomRAF = null;
-  container.addEventListener('wheel', e => {
-    if (!e.ctrlKey && !e.shiftKey) return; // let the page scroll
-    e.preventDefault();
-    const factor = Math.exp(-e.deltaY * 0.0005); // gentle: ~×1.05 per typical tick
-    pendingZoom = (pendingZoom !== null ? pendingZoom : zoomFactor) * factor;
-    pendingZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, pendingZoom));
-    if (!zoomRAF) {
-      zoomRAF = requestAnimationFrame(() => {
-        zoomFactor = pendingZoom;
-        projection.scale(baseScale());
-        redrawAll();
-        pendingZoom = null;
-        zoomRAF = null;
-      });
-    }
-  }, { passive: false });
 
   // ─── Snappier programmatic zoom (button clicks) ───────────────────────────
   function setZoom(z, animate) {
@@ -2203,12 +2249,32 @@ const ASSETS = [
   let autoRotating = false;  // off by default — opt in via the rotate button
   let lastT = Date.now();
   function tick() {
-    if (autoRotating && !dragging) {
+    // Priority 1: ease toward the drag target if there is one. This filters
+    // jitter (cursor moves 2px → globe smoothly catches up over a few frames
+    // rather than snapping). Settles to exact value once close enough.
+    if (targetRotation) {
+      const cur = projection.rotate();
+      const dλ = targetRotation[0] - cur[0];
+      const dφ = targetRotation[1] - cur[1];
+      if (Math.abs(dλ) < 0.02 && Math.abs(dφ) < 0.02) {
+        projection.rotate(targetRotation);
+        targetRotation = null;
+      } else {
+        projection.rotate([
+          cur[0] + dλ * ROTATE_DAMPING,
+          cur[1] + dφ * ROTATE_DAMPING,
+          cur[2]
+        ]);
+      }
+      redrawAll();
+      lastT = Date.now();
+    } else if (autoRotating && !dragging) {
       const now = Date.now();
       const dt = now - lastT;
       lastT = now;
       const r = projection.rotate();
-      projection.rotate([r[0] + dt * 0.012, r[1], r[2]]);
+      // Slowed from 0.012 → AUTO_ROTATE_SPEED (0.006). Reads as drift, not spin.
+      projection.rotate([r[0] + dt * AUTO_ROTATE_SPEED, r[1], r[2]]);
       redrawAll();
     } else {
       lastT = Date.now();
