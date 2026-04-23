@@ -1176,7 +1176,7 @@ Thanks,
 
     <div class="audit-layout">
       <div class="globe-wrap" id="globe-container">
-        <div class="globe-hint">Click + drag to rotate · use + / − to zoom</div>
+        <div class="globe-hint">Drag to rotate · flick to spin · + / − to zoom</div>
         <div class="globe-zoom-stack">
           <button class="globe-zoom-btn" id="zoom-in" title="Zoom in">+</button>
           <button class="globe-zoom-btn" id="zoom-out" title="Zoom out">−</button>
@@ -2139,45 +2139,45 @@ const ASSETS = [
   // Cursor must move this many px from mousedown before drag-rotate begins.
   // Same value passed to clickDistance() below so marker clicks survive a small wiggle.
   const DRAG_THRESHOLD = 7;
-  // How aggressively the displayed rotation eases toward the drag target each frame.
-  // 1.0 = instant snap (twitchy), 0.15 = mushy. 0.32 reads as smooth but responsive.
-  const ROTATE_DAMPING = 0.32;
-  // Auto-rotate speed in deg/ms. Halved from 0.012 so it reads as "slow drift" not "spin".
+  // Auto-rotate speed in deg/ms. Slow drift, not spin.
   const AUTO_ROTATE_SPEED = 0.006;
+  // ─── Snapchat-Maps style momentum ─────────────────────────────────────────
+  // While dragging: rotation tracks the cursor 1:1 (no damping — feels direct).
+  // On release: continue rotating with the average velocity of the last ~80ms,
+  // decaying multiplicatively each frame until below MOMENTUM_STOP. Comes to a
+  // calm, organic stop in roughly 1–1.5s depending on flick speed.
+  const MOMENTUM_DECAY = 0.95;
+  const MOMENTUM_STOP  = 0.05;     // deg/frame — below this, motion ends
+  const VELOCITY_WINDOW_MS = 80;   // sample the last N ms of drag for release velocity
 
-  // ─── Versor-based drag with threshold + damping ───────────────────────────
-  // Drag now sets a TARGET rotation; the tick loop eases the actual projection
-  // rotation toward it. This filters jitter and gives a calmer feel than the
-  // previous instant-snap behavior.
+  // ─── Versor-based drag with threshold + momentum ──────────────────────────
   let dragging = false;
   let v0, q0, r0;
   let dragStartX = 0, dragStartY = 0;
-  let dragActive = false;        // true once threshold is crossed
-  let targetRotation = null;     // damping target; tick() eases toward this
+  let dragActive = false;          // true once threshold is crossed
+  let momentumVel = [0, 0];        // [dλ, dφ] per ~16ms frame
+  let momentumActive = false;
+  let velHistory = [];             // recent {time, dλ, dφ} for release-velocity calc
   let wasAutoRotatingBeforeDrag = false;
   const hintWrap = document.getElementById('globe-container');
 
   svg.call(d3.drag()
-    // d3 will suppress the underlying click event only if the user moved >= this
-    // many px between mousedown and mouseup. So small wiggle on a marker click
-    // still fires the marker's click handler — drag does not steal it.
+    // Suppress underlying click only after this much movement; below it,
+    // marker click handlers fire normally even with a small wiggle.
     .clickDistance(DRAG_THRESHOLD)
     .on('start', (event) => {
-      // Just record where the gesture started — don't touch the globe yet.
       dragStartX = event.x;
       dragStartY = event.y;
       dragActive = false;
+      momentumActive = false;       // a new touch always cancels any glide
+      velHistory = [];
     })
     .on('drag', (event) => {
       if (!dragActive) {
-        // Below threshold? Do absolutely nothing — feels like a click.
         const dx = event.x - dragStartX;
         const dy = event.y - dragStartY;
         if (Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
-
-        // Threshold crossed — initialize versor state at the CURRENT cursor
-        // position so the rotation feels anchored to where the user really
-        // started dragging, not where they happened to mousedown.
+        // Threshold crossed — initialize versor state at the CURRENT cursor pos.
         dragActive = true;
         wasAutoRotatingBeforeDrag = autoRotating;
         if (autoRotating) toggleRotate();
@@ -2187,21 +2187,48 @@ const ASSETS = [
         r0 = projection.rotate();
         q0 = vFromAngles(r0);
         dragging = true;
-        hintWrap.classList.add('has-interacted'); // fade the hint
+        hintWrap.classList.add('has-interacted');
       }
       if (!v0) return;
       const inv = projection.rotate(r0).invert([event.x, event.y]);
       if (!inv || isNaN(inv[0]) || isNaN(inv[1])) return;
       const v1 = vCart(inv);
       const q1 = vMul(q0, vDelta(v0, v1));
-      // Don't snap — set a target. tick() will ease toward it.
-      targetRotation = vToAngles(q1);
+      const newRot = vToAngles(q1);
+      const prev = projection.rotate();
+
+      // Track this delta for release-velocity calculation
+      velHistory.push({
+        time: performance.now(),
+        dλ: newRot[0] - prev[0],
+        dφ: newRot[1] - prev[1]
+      });
+      while (velHistory.length && performance.now() - velHistory[0].time > VELOCITY_WINDOW_MS) {
+        velHistory.shift();
+      }
+
+      // Direct 1:1 follow — no damping. Snapchat Maps feels this way.
+      projection.rotate(newRot);
+      redrawAll();
     })
     .on('end', () => {
       dragActive = false;
       dragging = false;
       v0 = q0 = r0 = null;
-      // Leave targetRotation alone so the tick loop settles smoothly to it.
+
+      // If user was actually flicking, kick off momentum
+      if (velHistory.length >= 2) {
+        const sumDλ = velHistory.reduce((s, v) => s + v.dλ, 0);
+        const sumDφ = velHistory.reduce((s, v) => s + v.dφ, 0);
+        const span  = (velHistory[velHistory.length-1].time - velHistory[0].time) + 16;
+        // Normalize to per-frame velocity
+        const vx = sumDλ * 16 / span;
+        const vy = sumDφ * 16 / span;
+        if (Math.hypot(vx, vy) > MOMENTUM_STOP) {
+          momentumVel = [vx, vy];
+          momentumActive = true;
+        }
+      }
     })
   );
 
@@ -2249,31 +2276,29 @@ const ASSETS = [
   let autoRotating = false;  // off by default — opt in via the rotate button
   let lastT = Date.now();
   function tick() {
-    // Priority 1: ease toward the drag target if there is one. This filters
-    // jitter (cursor moves 2px → globe smoothly catches up over a few frames
-    // rather than snapping). Settles to exact value once close enough.
-    if (targetRotation) {
-      const cur = projection.rotate();
-      const dλ = targetRotation[0] - cur[0];
-      const dφ = targetRotation[1] - cur[1];
-      if (Math.abs(dλ) < 0.02 && Math.abs(dφ) < 0.02) {
-        projection.rotate(targetRotation);
-        targetRotation = null;
+    // Priority 1: momentum glide after a flick. Velocity decays each frame;
+    // motion ends naturally when velocity drops below MOMENTUM_STOP.
+    if (momentumActive && !dragging) {
+      momentumVel[0] *= MOMENTUM_DECAY;
+      momentumVel[1] *= MOMENTUM_DECAY;
+      if (Math.hypot(momentumVel[0], momentumVel[1]) < MOMENTUM_STOP) {
+        momentumActive = false;
+        lastT = Date.now();
       } else {
+        const r = projection.rotate();
         projection.rotate([
-          cur[0] + dλ * ROTATE_DAMPING,
-          cur[1] + dφ * ROTATE_DAMPING,
-          cur[2]
+          r[0] + momentumVel[0],
+          r[1] + momentumVel[1],
+          r[2]
         ]);
+        redrawAll();
       }
-      redrawAll();
-      lastT = Date.now();
     } else if (autoRotating && !dragging) {
       const now = Date.now();
       const dt = now - lastT;
       lastT = now;
       const r = projection.rotate();
-      // Slowed from 0.012 → AUTO_ROTATE_SPEED (0.006). Reads as drift, not spin.
+      // Slow drift, not spin
       projection.rotate([r[0] + dt * AUTO_ROTATE_SPEED, r[1], r[2]]);
       redrawAll();
     } else {
